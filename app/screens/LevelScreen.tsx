@@ -56,7 +56,7 @@ const LevelScreen = () => {
           <TouchableOpacity 
             key={level.Level_Id} 
             style={tw`mb-4`} 
-            onPress={() => navigation.navigate('ExerciseDetails', { id: level.Level_Id })}
+            onPress={() => navigation.navigate('Exercises', { id: level.Level_Id })}
           >
             <Card containerStyle={tw`rounded-xl p-0 bg-[#2D2E6F] border-0`}> 
               <Card.Title style={tw`text-lg text-white`}>{level.Level_Name}</Card.Title>
