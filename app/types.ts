@@ -3,4 +3,5 @@ export type RootStackParamList = {
     ExerciseDetails: { id: number };
     Exercises: { id: number };
     Content: undefined;
+    TimerScreen : undefined;
   };

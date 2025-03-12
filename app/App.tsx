@@ -12,7 +12,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LevelScreen">        
+      <Stack.Navigator initialRouteName="LevelScreen">
         <Stack.Screen name="LevelScreen" component={LevelScreen} />
         <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />
         <Stack.Screen name="Exercises" component={Exercises} />
