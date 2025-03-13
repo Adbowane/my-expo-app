@@ -43,6 +43,7 @@ const LevelScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={tw`p-4 bg-[#1A1B41]`}>  
+   
       <LinearGradient colors={["#9188F1", "#6A5ACD"]} style={tw`p-5 rounded-xl mb-6`}>
         <Text style={tw`text-3xl font-bold text-white text-center`}>Niveaux</Text>
       </LinearGradient>
@@ -56,7 +57,7 @@ const LevelScreen = () => {
           <TouchableOpacity 
             key={level.Level_Id} 
             style={tw`mb-4`} 
-            onPress={() => navigation.navigate('Exercises', { id: level.Level_Id })}
+            onPress={() => navigation.navigate('Goals', { id: level.Level_Id })}
           >
             <Card containerStyle={tw`rounded-xl p-0 bg-[#2D2E6F] border-0`}> 
               <Card.Title style={tw`text-lg text-white`}>{level.Level_Name}</Card.Title>
