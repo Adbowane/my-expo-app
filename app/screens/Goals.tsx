@@ -157,14 +157,7 @@ const Goals = () => {
       <StatusBar barStyle="dark-content" />
       
       {/* Header */}
-      <View style={tw`pt-12 px-5 flex-row justify-between items-center`}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="bookmark-outline" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
+      
       
       {/* Fitness Category Badge */}
       <View style={tw`px-5 mt-4`}>
