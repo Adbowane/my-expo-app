@@ -6,7 +6,7 @@ import { RootStackParamList } from '../types';
 import tw from 'twrnc';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
-import { Feather, FontAwesome5 } from '@expo/vector-icons';
+import { Feather, FontAwesome5, Ionicons } from '@expo/vector-icons';
 
 // Type de navigation pour l'écran de niveaux
 type LevelScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LevelScreen'>;
@@ -191,20 +191,27 @@ const LevelScreen = () => {
         )}
       </ScrollView>
       
-      {/* Barre de navigation du bas */}
-      <View style={tw`bg-indigo-900 p-4 flex-row justify-around items-center rounded-t-xl`}>
-        {/* Icône d'apprentissage */}
-        <FontAwesome5 name="graduation-cap" size={20} color="white" />
-        {/* Icône de paramètres */}
-        <Feather name="settings" size={20} color="white" />
-        {/* Indicateur de progression central */}
-        <View style={tw`bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center -mt-8`}>
-          <Text style={tw`text-white font-bold`}>50%</Text>
-        </View>
-        {/* Icône d'ajout */}
-        <Feather name="plus" size={20} color="white" />
-        {/* Icône de boutique */}
-        <Feather name="shopping-bag" size={20} color="white" />
+      {/* Bottom Navigation */}
+      <View style={tw`absolute bottom-0 left-0 right-0 h-20 flex-row justify-around items-center bg-white border-t border-gray-200 px-4`}>
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Home')}>
+          <Ionicons name="calendar-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Aujourd'hui</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Exercises', { id: 1 })}>
+          <Ionicons name="flame-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Exercices</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`}>
+          <Ionicons name="restaurant-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Repas</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('DashboardScreen')}>
+          <Ionicons name="person-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Profil</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

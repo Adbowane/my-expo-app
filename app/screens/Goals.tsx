@@ -9,7 +9,8 @@ import {
   Dimensions,
   StatusBar,
   Animated,
-  ImageBackground
+  ImageBackground,
+  ScrollView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -153,7 +154,7 @@ const Goals = () => {
   }
 
   return (
-    <View style={tw`flex-1 bg-gray-100`}>
+    <ScrollView style={tw`flex-1 bg-gray-100`}>
       <StatusBar barStyle="dark-content" />
       
       {/* Header */}
@@ -206,9 +207,12 @@ const Goals = () => {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => handleSelectGoal(item.Goal_Id, index)}
-              style={tw`w-${Math.round(CARD_WIDTH)} px-4`}
+              style={[
+                tw`w-${Math.round(CARD_WIDTH)} px-2 rounded-3xl opacity-100`,
+                isSelected && tw`border-4 border-purple-500 opacity-90 ` // Entourer l'élément sélectionné d'un néon violet
+              ]}
             >
-              <View style={tw`bg-white rounded-3xl shadow-md overflow-hidden h-160`}>
+              <View style={tw`bg-white rounded-3xl shadow-md overflow-hidden h-160 `}>
                 {/* Goal Image and Details with Gradient */}
                 <View style={tw`h-2/3 justify-center items-center bg-gray-100 relative`}>
                   {/* This would be a real image in production */}
@@ -293,16 +297,40 @@ const Goals = () => {
       
       {/* Next Button */}
       {selectedGoal && (
-        <View style={tw`px-5 mb-8`}>
+        <View style={tw`px-5 mb-24`}> {/* Ajout de mb-24 pour espacer le bouton de la barre de navigation */}
           <TouchableOpacity
-            style={tw`bg-blue-600 p-4 rounded-full items-center shadow-md`}
+            style={tw`bg-violet-600 p-4 rounded-full items-center shadow-md`}
             onPress={() => navigation.navigate('Programmes', { goalId: selectedGoal })}
           >
             <Text style={tw`text-lg font-bold text-white`}>Commencer cet objectif</Text>
           </TouchableOpacity>
         </View>
       )}
-    </View>
+
+       {/* Bottom Navigation */}
+       <View style={tw`absolute bottom-0 left-0 right-0 h-20 flex-row justify-around items-center bg-white border-t border-gray-200 px-4`}>
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Today')}>
+          <Ionicons name="calendar-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Aujourd'hui</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Workouts')}>
+          <Ionicons name="flame-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Exercices</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`}>
+          <Ionicons name="restaurant-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Repas</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Profile')}>
+          <Ionicons name="person-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Profil</Text>
+        </TouchableOpacity>
+      </View>
+
+    </ScrollView>
   );
 };
 

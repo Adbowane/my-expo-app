@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView, StatusBar } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import tw from 'twrnc';
-import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
-import { FontAwesome } from '@expo/vector-icons';
-import * as Progress from 'react-native-progress';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 type ExerciseDetailsNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ExerciseDetails'>;
 
@@ -17,6 +15,8 @@ interface Exercise {
   Exercise_Name: string;
   Image: string;
   Time: string; // Time as a string in HH:MM:SS format
+  Program_Name?: string; // Added for program name
+  Next_Exercise_Name?: string; // Added for next exercise
 }
 
 // Utility function to convert HH:MM:SS to seconds
@@ -36,6 +36,7 @@ const ExerciseDetails = () => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [initialTime, setInitialTime] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [nextExercise, setNextExercise] = useState<string>('Bridge Pose (Setu Bandhasana)');
 
   useEffect(() => {
     const fetchExercise = async () => {
@@ -43,10 +44,20 @@ const ExerciseDetails = () => {
         setError(null);
         const response = await axios.get(`http://172.31.16.1:3000/api/exercises/${id}`);
         const fetchedExercise = response.data;
+        // Add mock program name for UI
+        fetchedExercise.Program_Name = "Morning Energizer";
         setExercise(fetchedExercise);
         const seconds = timeStringToSeconds(fetchedExercise.Time);
         setTimeLeft(seconds);
         setInitialTime(seconds);
+        
+        // Optionally fetch next exercise info
+        try {
+          const nextResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/${id + 1}`);
+          setNextExercise(nextResponse.data.Exercise_Name);
+        } catch (err) {
+          console.log('Next exercise not available');
+        }
       } catch (err) {
         console.error('Erreur lors de la récupération de l\'exercice:', err);
         setError('Impossible de récupérer l\'exercice.');
@@ -97,49 +108,101 @@ const ExerciseDetails = () => {
 
   if (loading) {
     return (
-      <View style={tw`flex-1 bg-[#1A1B41] justify-center items-center`}>
-        <ActivityIndicator size="large" color="#9188F1" />
+      <View style={tw`flex-1 bg-white justify-center items-center`}>
+        <ActivityIndicator size="large" color="#48B0F1" />
       </View>
     );
   }
 
   if (error || !exercise) {
     return (
-      <View style={tw`flex-1 bg-[#1A1B41] justify-center items-center`}>
+      <View style={tw`flex-1 bg-white justify-center items-center`}>
         <Text style={tw`text-red-500 text-center text-lg`}>{error || 'Exercice non trouvé.'}</Text>
       </View>
     );
   }
 
   return (
-    <View style={tw`flex-1 bg-[#1A1B41] p-5`}> 
-      <LinearGradient colors={['#9188F1', '#6A5ACD']} style={tw`p-5 rounded-b-xl`}>
-        <Text style={tw`text-3xl font-bold text-white text-center`}>PRÊT À Y ALLER</Text>
-      </LinearGradient>
-      <View style={tw`flex-1 justify-center items-center p-5`}>        
-        <Image source={{ uri: exercise.Image }} style={tw`w-3/4 h-1/2 mb-5`} resizeMode="contain" />
-        <Text style={tw`text-2xl font-bold text-white mb-2`}>{exercise.Exercise_Name}</Text>
-        <Progress.Circle
-          size={120}
-          progress={initialTime > 0 ? timeLeft / initialTime : 0}
-          showsText
-          formatText={() => formatTime(timeLeft)}
-          thickness={8}
-          color="#6A5ACD"
-        />
-        <View style={tw`flex-row mt-5`}>          
-          <TouchableOpacity onPress={startTimer} style={tw`bg-green-500 p-3 rounded-full mx-2`}>
-            <FontAwesome name="play" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={stopTimer} style={tw`bg-yellow-500 p-3 rounded-full mx-2`}>
-            <FontAwesome name="pause" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('ExerciseDetails', { id: id + 1 })} style={tw`bg-red-500 p-3 rounded-full mx-2`}>
-            <FontAwesome name="step-forward" size={24} color="white" />
+    <SafeAreaView style={tw`flex-1 bg-white`}>
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
+      <View style={tw`flex-row items-center justify-between px-4 pt-2`}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons name="settings-outline" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
+      
+      {/* Program and Exercise Name */}
+      <View style={tw`px-6 py-3`}>
+        <Text style={tw`text-gray-500 text-center text-sm font-medium`}>{exercise.Program_Name}</Text>
+        <Text style={tw`text-black text-center text-xl font-semibold mt-1`}>{exercise.Exercise_Name}</Text>
+      </View>
+      
+      {/* Timer Container */}
+      <View style={tw`mx-6 bg-gray-100 rounded-2xl overflow-hidden`}>
+        <View style={tw`flex-row items-center justify-between p-4`}>
+          <View>
+            <Text style={tw`text-gray-500 text-xs font-medium`}>Timer</Text>
+            <Text style={[tw`text-3xl font-bold`, {color: '#000'}]}>
+              {formatTime(timeLeft)}
+            </Text>
+            <TouchableOpacity 
+              style={tw`bg-gray-800 rounded-lg px-4 py-1 mt-1`}
+              onPress={() => {
+                setIsTimerRunning(false);
+                setTimeLeft(initialTime);
+              }}
+            >
+              <Text style={tw`text-white text-xs font-medium text-center`}>Stop</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Circular Timer */}
+          <TouchableOpacity 
+            style={[
+              tw`w-20 h-20 rounded-full justify-center items-center`,
+              { backgroundColor: '#9188F1' }
+            ]}
+            onPress={isTimerRunning ? stopTimer : startTimer}
+          >
+            <View style={tw`items-center justify-center`}>
+              {isTimerRunning ? (
+                <Ionicons name="pause" size={32} color="white" />
+              ) : (
+                <Ionicons name="play" size={32} color="white" />
+              )}
+            </View>
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+      
+      {/* Exercise Image */}
+      <View style={tw`flex-1 justify-center items-center px-6 py-4`}>
+        <Image 
+          source={{ uri: exercise.Image }} 
+          style={tw`w-4/5 h-64`} 
+          resizeMode="contain" 
+        />
+      </View>
+      
+      {/* Next Exercise */}
+      <View style={tw`px-6 pb-8`}>
+        <TouchableOpacity 
+          style={tw`flex-row items-center`}
+          onPress={() => navigation.navigate('ExerciseDetails', { id: id + 1 })}
+        >
+          <MaterialIcons name="format-list-bulleted" size={24} color="gray" />
+          <View style={tw`ml-2`}>
+            <Text style={tw`text-gray-400 text-xs`}>Next exercise:</Text>
+            <Text style={tw`text-gray-600 text-sm`}>{nextExercise}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
