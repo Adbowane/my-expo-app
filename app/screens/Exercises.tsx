@@ -4,7 +4,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import tw from 'twrnc';
-import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
@@ -46,7 +45,7 @@ const Exercises = () => {
       
       // Récupérer les détails du programme
       const programResponse = await axios.get(`http://172.31.16.1:3000/api/programs/${programId}`);
-      setProgram(programResponse.data[0]);
+      setProgram(programResponse.data);
       
       // Récupérer les exercices du programme
       const exercisesResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/program/${programId}`);
@@ -67,13 +66,21 @@ const Exercises = () => {
 
   // Naviguer vers les détails d'un exercice
   const handleExerciseSelect = (exerciseId: number) => {
-    navigation.navigate('ExerciseDetails', { id: exerciseId });
+    navigation.navigate('ExerciseDetails', { 
+      id: exerciseId,
+      programId: programId,
+      exercises: exercises.map(ex => ex.Exercise_Id)
+    });
   };
 
-  // Commencer l'entraînement
+  // Commencer l'entraînement avec le premier exercice du programme
   const handleStartWorkout = () => {
-    if (program) {
-      navigation.navigate('ExerciseDetails', { id: program.Program_Id });
+    if (exercises.length > 0) {
+      navigation.navigate('ExerciseDetails', { 
+        id: exercises[0].Exercise_Id,
+        programId: programId,
+        exercises: exercises.map(ex => ex.Exercise_Id)
+      });
     }
   };
 

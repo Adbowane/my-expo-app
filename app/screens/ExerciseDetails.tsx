@@ -16,7 +16,6 @@ interface Exercise {
   Image: string;
   Time: string; // Time as a string in HH:MM:SS format
   Program_Name?: string; // Added for program name
-  Next_Exercise_Name?: string; // Added for next exercise
 }
 
 // Utility function to convert HH:MM:SS to seconds
@@ -28,35 +27,67 @@ const timeStringToSeconds = (timeString: string): number => {
 const ExerciseDetails = () => {
   const navigation = useNavigation<ExerciseDetailsNavigationProp>();
   const route = useRoute();
-  const { id } = route.params as { id: number };
+  // Mise à jour de la récupération des paramètres
+  const { id, programId, exercises = [] } = route.params as { 
+    id: number, 
+    programId: number,
+    exercises: number[] 
+  };
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
+  const [programExercises, setProgramExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [initialTime, setInitialTime] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
-  const [nextExercise, setNextExercise] = useState<string>('Bridge Pose (Setu Bandhasana)');
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
+  const [programName, setProgramName] = useState<string>("");
 
   useEffect(() => {
-    const fetchExercise = async () => {
+    const fetchExerciseAndProgram = async () => {
       try {
         setError(null);
-        const response = await axios.get(`http://172.31.16.1:3000/api/exercises/${id}`);
-        const fetchedExercise = response.data;
-        // Add mock program name for UI
-        fetchedExercise.Program_Name = "Morning Energizer";
+        setLoading(true);
+        
+        // Récupérer l'exercice actuel
+        const exerciseResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/${id}`);
+        const fetchedExercise = exerciseResponse.data;
+        
+        // Récupérer le nom du programme
+        const programResponse = await axios.get(`http://172.31.16.1:3000/api/programs/${programId}`);
+        setProgramName(programResponse.data.Program_Name);
+        fetchedExercise.Program_Name = programResponse.data.Program_Name;
+        
         setExercise(fetchedExercise);
+        
+        // Initialiser le timer
         const seconds = timeStringToSeconds(fetchedExercise.Time);
         setTimeLeft(seconds);
         setInitialTime(seconds);
         
-        // Optionally fetch next exercise info
-        try {
-          const nextResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/${id + 1}`);
-          setNextExercise(nextResponse.data.Exercise_Name);
-        } catch (err) {
-          console.log('Next exercise not available');
+        // Récupérer tous les exercices du programme pour la navigation
+        if (exercises.length === 0) {
+          const programExercisesResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/program/${programId}`);
+          setProgramExercises(programExercisesResponse.data);
+          
+          // Trouver l'index de l'exercice actuel
+          const index = programExercisesResponse.data.findIndex(
+            (ex: Exercise) => ex.Exercise_Id === id
+          );
+          setCurrentExerciseIndex(index !== -1 ? index : 0);
+        } else {
+          // Si nous avons déjà les IDs des exercices, récupérer leurs détails
+          const fetchedExercises = await Promise.all(
+            exercises.map((id: number) => 
+              axios.get(`http://172.31.16.1:3000/api/exercises/${id}`).then(res => res.data)
+            )
+          );
+          setProgramExercises(fetchedExercises);
+          
+          // Trouver l'index de l'exercice actuel
+          const index = exercises.findIndex((exerciseId: number) => exerciseId === id);
+          setCurrentExerciseIndex(index !== -1 ? index : 0);
         }
       } catch (err) {
         console.error('Erreur lors de la récupération de l\'exercice:', err);
@@ -67,8 +98,8 @@ const ExerciseDetails = () => {
       }
     };
 
-    fetchExercise();
-  }, [id]);
+    fetchExerciseAndProgram();
+  }, [id, programId, exercises]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -78,7 +109,8 @@ const ExerciseDetails = () => {
           if (prevTime <= 1) {
             clearInterval(timer);
             setIsTimerRunning(false);
-            navigation.navigate('ExerciseDetails', { id: id + 1 });
+            // Passer à l'exercice suivant dans le programme
+            goToNextExercise();
             return 0;
           }
           return prevTime - 1;
@@ -86,7 +118,7 @@ const ExerciseDetails = () => {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isTimerRunning, timeLeft, navigation, id]);
+  }, [isTimerRunning, timeLeft]);
 
   const startTimer = () => {
     if (!isTimerRunning && timeLeft > 0) {
@@ -104,6 +136,31 @@ const ExerciseDetails = () => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
+  // Fonction pour aller à l'exercice suivant dans le programme
+  const goToNextExercise = () => {
+    if (programExercises.length > 0) {
+      const nextIndex = (currentExerciseIndex + 1) % programExercises.length;
+      const nextExercise = programExercises[nextIndex];
+      
+      if (nextExercise) {
+        navigation.replace('ExerciseDetails', {
+          id: nextExercise.Exercise_Id,
+          programId: programId,
+          exercises: exercises.length > 0 ? exercises : programExercises.map(ex => ex.Exercise_Id)
+        });
+      }
+    }
+  };
+
+  // Fonction pour obtenir le nom du prochain exercice
+  const getNextExerciseName = (): string => {
+    if (programExercises.length > 0) {
+      const nextIndex = (currentExerciseIndex + 1) % programExercises.length;
+      return programExercises[nextIndex]?.Exercise_Name || "Fin du programme";
+    }
+    return "Chargement...";
   };
 
   if (loading) {
@@ -193,12 +250,12 @@ const ExerciseDetails = () => {
       <View style={tw`px-6 pb-8`}>
         <TouchableOpacity 
           style={tw`flex-row items-center`}
-          onPress={() => navigation.navigate('ExerciseDetails', { id: id + 1 })}
+          onPress={goToNextExercise}
         >
           <MaterialIcons name="format-list-bulleted" size={24} color="gray" />
           <View style={tw`ml-2`}>
-            <Text style={tw`text-gray-400 text-xs`}>Next exercise:</Text>
-            <Text style={tw`text-gray-600 text-sm`}>{nextExercise}</Text>
+            <Text style={tw`text-gray-400 text-xs`}>Prochain exercice:</Text>
+            <Text style={tw`text-gray-600 text-sm`}>{getNextExerciseName()}</Text>
           </View>
         </TouchableOpacity>
       </View>

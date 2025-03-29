@@ -56,7 +56,7 @@ type Goal = {
 
 // Images de secours par catégorie
 export const fallbackImages = {
-  'Perte de poids': 'https://images.pexels.com/photos/31202991/pexels-photo-31202991.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+  'Perte de poids': 'https://tse4.mm.bing.net/th?id=OIG3.RAolgCJjIH4B4ovrt1tf&pid=ImgGn',
   'Gain musculaire': 'https://tse4.mm.bing.net/th?id=OIG3.RAolgCJjIH4B4ovrt1tf&pid=ImgGn',
   'Maintien de forme': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=1169&auto=format&fit=crop',
   'Endurance cardio': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1170&auto=format&fit=crop',

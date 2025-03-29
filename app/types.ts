@@ -1,7 +1,7 @@
 export type RootStackParamList = {
     IndexScreen: undefined;
-    ExerciseDetails: { id: number };
     Exercises: { id: number };
+    ExerciseDetails: { id: number; programId?: number; exercises: number[] }; // Add programId and exercises
     Content: { id: number };
     Index: undefined;
     TimerScreen : undefined;
