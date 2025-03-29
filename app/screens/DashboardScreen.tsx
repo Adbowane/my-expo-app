@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import tw from 'twrnc';
+import Navbar from '../components/Navbar';
 
 const DashboardScreen = () => {
   const insets = useSafeAreaInsets();
@@ -44,7 +45,7 @@ const DashboardScreen = () => {
           Sprint for 30 seconds. Repeat this interval 5 times.
         </Text>
         <TouchableOpacity style={tw`mt-4 bg-purple-600 px-4 py-2 rounded-full`}>
-          <Text style={tw`text-white text-center`}>Done ></Text>
+          <Text style={tw`text-white text-center`}>Done {'>'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -53,7 +54,7 @@ const DashboardScreen = () => {
         <View style={tw`flex-row justify-between items-center mb-2`}>
           <Text style={tw`text-lg font-semibold`}>Today Stats</Text>
           <TouchableOpacity>
-            <Text style={tw`text-blue-500`}>See All ></Text>
+            <Text style={tw`text-blue-500`}>See All{'>'}</Text>
           </TouchableOpacity>
         </View>
         <ScrollView
@@ -86,7 +87,7 @@ const DashboardScreen = () => {
         <View style={tw`flex-row justify-between items-center mb-2`}>
           <Text style={tw`text-lg font-semibold`}>Recent Activity</Text>
           <TouchableOpacity>
-            <Text style={tw`text-blue-500`}>See All ></Text>
+            <Text style={tw`text-blue-500`}>See All {'>'}</Text>
           </TouchableOpacity>
         </View>
         <View style={tw`bg-gray-100 p-4 rounded-lg`}>
@@ -119,6 +120,9 @@ const DashboardScreen = () => {
       {/* Safe Area Padding at Bottom */}
       <View style={{ paddingBottom: insets.bottom }} />
     </View>
+      {/* Navbar */}
+      <Navbar />
+
     </ScrollView>
   );
 };

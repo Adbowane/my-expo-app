@@ -1,37 +1,35 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import tw from 'twrnc';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Navbar() {
   const router = useRouter();
 
   return (
-    <View style={styles.navbar}>
-      <TouchableOpacity onPress={() => router.push('/')}>
-        <Text style={styles.navItem}>🏠 Home</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/Pages/Goals')}>
-        <Text style={styles.navItem}>🎯 Goals</Text>
-      </TouchableOpacity>
-    </View>
+    <View style={tw`flex-row justify-around items-center bg-white border-t border-gray-200 px-4 py-3`}>
+        <TouchableOpacity style={tw`items-center`} onPress={() => router.push('/today')}>
+          <Ionicons name="calendar-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Aujourd'hui</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => router.push('/workouts')}>
+          <Ionicons name="flame-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Exercices</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`}>
+          <Ionicons name="restaurant-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Repas</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => router.push('/profile')}>
+          <Ionicons name="person-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Profil</Text>
+        </TouchableOpacity>
+      </View>
   );
 }
 
-const styles = StyleSheet.create({
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 15,
-    backgroundColor: '#4caf50',
-    borderRadius: 20, // Arrondi sur tous les côtés
-    marginHorizontal: 10, // Ajoute un peu de marge pour éviter que la navbar touche les bords de l'écran
-    marginBottom: 10, // Ajoute un peu d'espace sous la navbar
-    paddingHorizontal: 15, // Ajoute du padding pour un meilleur rendu
-  },
-  navItem: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
 
 

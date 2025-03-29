@@ -324,28 +324,8 @@ const Goals = () => {
         )}
       </ScrollView>
 
-      {/* Navigation du bas */}
-      <View style={tw`absolute bottom-0 left-0 right-0 h-20 flex-row justify-around items-center bg-white border-t border-gray-200 px-4`}>
-        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Today')}>
-          <Ionicons name="calendar-outline" size={24} color="#888" />
-          <Text style={tw`text-xs text-gray-500 mt-1`}>Aujourd'hui</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Workouts')}>
-          <Ionicons name="flame-outline" size={24} color="#888" />
-          <Text style={tw`text-xs text-gray-500 mt-1`}>Exercices</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={tw`items-center`}>
-          <Ionicons name="restaurant-outline" size={24} color="#888" />
-          <Text style={tw`text-xs text-gray-500 mt-1`}>Repas</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Profile')}>
-          <Ionicons name="person-outline" size={24} color="#888" />
-          <Text style={tw`text-xs text-gray-500 mt-1`}>Profil</Text>
-        </TouchableOpacity>
-      </View>
+     {/* Navbar */}
+     <Navbar />
     
     </View>
   );

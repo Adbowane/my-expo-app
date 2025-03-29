@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types'; // Ensure this path is correct
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
 
 // Define the navigation prop type for this screen
@@ -52,7 +53,7 @@ const SettingsScreen = () => {
             <Text style={tw`text-2xl`}>👥</Text>
             <Text style={tw`text-base ml-3`}>Friends</Text>
           </View>
-          <Text style={tw`text-gray-400`} >></Text>
+          <Text style={tw`text-gray-400`} >{'>'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -63,7 +64,7 @@ const SettingsScreen = () => {
             <Text style={tw`text-2xl`}>📊</Text>
             <Text style={tw`text-base ml-3`}>Statistics</Text>
           </View>
-          <Text style={tw`text-gray-400`}>></Text>
+          <Text style={tw`text-gray-400`}>{'>'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -74,7 +75,7 @@ const SettingsScreen = () => {
             <Text style={tw`text-2xl`}>📚</Text>
             <Text style={tw`text-base ml-3`}>Academy</Text>
           </View>
-          <Text style={tw`text-gray-400`}>></Text>
+          <Text style={tw`text-gray-400`}>{'>'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -85,7 +86,7 @@ const SettingsScreen = () => {
             <Text style={tw`text-2xl`}>💪</Text>
             <Text style={tw`text-base ml-3`}>Strengthlog</Text>
           </View>
-          <Text style={tw`text-gray-400`}>></Text>
+          <Text style={tw`text-gray-400`}>{'>'}</Text>
         </TouchableOpacity>
 
         <View style={tw`flex-row items-center justify-between p-4 bg-white rounded-lg mb-2 shadow-sm`}>
@@ -104,21 +105,25 @@ const SettingsScreen = () => {
       </View>
 
       {/* Bottom Navigation */}
-      <View style={[tw`flex-row justify-around items-center bg-black p-2`, { paddingBottom: insets.bottom }]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <Text style={tw`text-white`}>Home</Text>
+      <View style={tw`absolute bottom-0 left-0 right-0 h-20 flex-row justify-around items-center bg-white border-t border-gray-200 px-4`}>
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Today')}>
+          <Ionicons name="calendar-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Aujourd'hui</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Jumps')}>
-          <Text style={tw`text-white`}>Jumps</Text>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('DashboardScreen')}>
+          <Ionicons name="flame-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Exercices</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Battle')}>
-          <Text style={tw`text-white`}>Battle</Text>
+        
+        <TouchableOpacity style={tw`items-center`}>
+          <Ionicons name="restaurant-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Repas</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Progress')}>
-          <Text style={tw`text-white`}>Progress</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <Text style={tw`text-white`}>Profile</Text>
+        
+        <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Profile')}>
+          <Ionicons name="person-outline" size={24} color="#888" />
+          <Text style={tw`text-xs text-gray-500 mt-1`}>Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
