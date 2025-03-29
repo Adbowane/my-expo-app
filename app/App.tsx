@@ -11,6 +11,7 @@ import IndexScreen from './screens/IndexScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import Programmes from './screens/ProgrammesScreen';
+import NewProgrammeScreen from './screens/NewProgrammeScreen';
 import Goals from './screens/Goals';
 import { RootStackParamList } from './types';
 
@@ -19,7 +20,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="IndexScreen">
+      <Stack.Navigator initialRouteName="IndexScreen">   
+        <Stack.Screen name="NewProgrammeScreen" component={NewProgrammeScreen} />    
         <Stack.Screen name="Programmes" component={Programmes} />
         <Stack.Screen name="Goals" component={Goals} />
         <Stack.Screen name="DashboardScreen" component={DashboardScreen} />

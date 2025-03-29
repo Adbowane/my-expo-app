@@ -1,20 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator,Image,FlatList,Dimensions,StatusBar} from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Dimensions, StatusBar } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import tw from 'twrnc';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 
-// Définition du type pour les paramètres de route
 type RouteParams = {
   levelId?: number;
-  goalId?: number;
+  goalId: number; // Maintenant obligatoire
 };
 
-// Définition correcte du type de navigation
 type RootStackParamList = {
-  Programmes: undefined;
+  Programmes: { goalId: number };
   Exercises: { programId: number };
   Today: undefined;
   Workouts: undefined;
@@ -28,7 +26,6 @@ type Program = {
   Program_Id: number;
   Program_Name: string;
   Goal_Id: number;
-  // Ajout de champs pour l'interface visuelle
   Icon?: string;
   Description?: string;
 };
@@ -45,9 +42,8 @@ export default function Programmes() {
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation<ProgrammesScreenNavigationProp>();
   const route = useRoute();
-  const { levelId, goalId } = (route.params as RouteParams) || {};
+  const { goalId } = route.params as RouteParams;
 
-  // Icônes pour les différents types de programmes
   const programIcons = [
     'barbell-outline', 
     'bicycle-outline', 
@@ -59,16 +55,22 @@ export default function Programmes() {
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        const response = await axios.get('http://172.31.16.1:3000/api/programs');
+        if (!goalId) {
+          throw new Error('Goal ID is required');
+        }
+
+        const response = await axios.get(`http://172.31.16.1:3000/api/programs/goal/${goalId}`);
         
-        // Enrichir les données avec des descriptions et icônes
         const enrichedData = response.data.map((program: Program, index: number) => ({
           ...program,
           Icon: programIcons[index % programIcons.length],
-          Description: `Programme adapté pour atteindre vos objectifs de ${program.Program_Name.toLowerCase()}`
+          Description: getProgramDescription(program.Program_Name)
         }));
         
         setProgrammes(enrichedData);
+        if (enrichedData.length > 0) {
+          setSelectedProgram(enrichedData[0].Program_Id);
+        }
       } catch (error) {
         console.error('Erreur lors de la récupération des programmes:', error);
       } finally {
@@ -77,7 +79,18 @@ export default function Programmes() {
     };
 
     fetchPrograms();
-  }, []);
+  }, [goalId]);
+
+  const getProgramDescription = (programName: string) => {
+    const descriptions: Record<string, string> = {
+      'Cardio intense': 'Programme intensif pour améliorer votre endurance cardiovasculaire',
+      'Programme prise de masse': 'Entraînement ciblé pour développer votre masse musculaire',
+      'Fitness quotidien': 'Routine quotidienne pour maintenir votre forme physique',
+      'Entraînement HIIT': 'Séances courtes et intenses pour maximiser la combustion des graisses',
+      'Programme haltérophilie': 'Développez votre force maximale avec des exercices de puissance'
+    };
+    return descriptions[programName] || `Programme spécialisé pour ${programName.toLowerCase()}`;
+  };
 
   const handleSelectProgram = (programId: number, index: number) => {
     setSelectedProgram(programId);
@@ -109,6 +122,16 @@ export default function Programmes() {
     );
   }
 
+  if (programmes.length === 0 && !loading) {
+    return (
+      <View style={tw`flex-1 justify-center items-center bg-white`}>
+        <StatusBar barStyle="dark-content" />
+        <Ionicons name="warning-outline" size={50} color="#888" />
+        <Text style={tw`text-lg font-medium text-gray-700 mt-4`}>Aucun programme disponible pour cet objectif</Text>
+      </View>
+    );
+  }
+
   const renderItem = ({ item, index }: { item: Program; index: number }) => (
     <TouchableOpacity
       style={tw`mx-2 bg-white rounded-3xl shadow-lg overflow-hidden w-${Math.round(ITEM_WIDTH)}`}
@@ -134,28 +157,25 @@ export default function Programmes() {
     <View style={tw`flex-1 bg-white`}>
       <StatusBar barStyle="dark-content" />
       
-      {/* Header */}
       <View style={tw`pt-12 pb-4 px-5`}>
         <Text style={tw`text-3xl font-bold text-gray-800`}>Programmes</Text>
-        <Text style={tw`text-base text-gray-600 mt-1`}>Sélectionnez votre programme d'entraînement</Text>
+        <Text style={tw`text-base text-gray-600 mt-1`}>Programmes adaptés à votre objectif</Text>
       </View>
       
-      {/* Carousel */}
-      <View style={tw`flex-1 `}>
+      <View style={tw`flex-1`}>
         <FlatList
           ref={flatListRef}
           data={programmes}
           horizontal
           showsHorizontalScrollIndicator={false}
-          snapToInterval={ITEM_WIDTH + 16} // 16 est pour les marges
+          snapToInterval={ITEM_WIDTH + 16}
           decelerationRate="fast"
-          contentContainerStyle={tw`py-4 px-2 `}
+          contentContainerStyle={tw`py-4 px-2`}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
           keyExtractor={(item) => item.Program_Id.toString()}
           renderItem={renderItem}
         />
         
-        {/* Indicators */}
         <View style={tw`flex-row justify-center my-4`}>
           {programmes.map((_, index) => (
             <View 
@@ -166,7 +186,6 @@ export default function Programmes() {
         </View>
       </View>
       
-      {/* Action Button */}
       {selectedProgram && (
         <View style={tw`px-5 pb-24`}>
           <TouchableOpacity
@@ -178,7 +197,6 @@ export default function Programmes() {
         </View>
       )}
       
-      {/* Bottom Navigation */}
       <View style={tw`absolute bottom-0 left-0 right-0 h-20 flex-row justify-around items-center bg-white border-t border-gray-200 px-4`}>
         <TouchableOpacity style={tw`items-center`} onPress={() => navigation.navigate('Today')}>
           <Ionicons name="calendar-outline" size={24} color="#888" />

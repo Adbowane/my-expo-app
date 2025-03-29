@@ -19,5 +19,6 @@ export type RootStackParamList = {
     Programmes: undefined;
     Home: undefined;
     LevelScreen: { name: string };
+    NewProgrammeScreen: undefined;
     Goals: { id: number };
   };
