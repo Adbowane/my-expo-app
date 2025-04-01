@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import Navbar from '../components/Navbar';
 import tw from 'twrnc';
+import { API_URL } from '../types';
 import axios from 'axios';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
@@ -45,11 +46,11 @@ const Exercises = () => {
       setError(null);
       
       // Récupérer les détails du programme
-      const programResponse = await axios.get(`http://172.31.16.1:3000/api/programs/${programId}`);
+      const programResponse = await axios.get(`${API_URL}/api/programs/${programId}`);
       setProgram(programResponse.data);
       
       // Récupérer les exercices du programme
-      const exercisesResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/program/${programId}`);
+      const exercisesResponse = await axios.get(`${API_URL}/api/exercises/program/${programId}`);
       setExercises(exercisesResponse.data);
       
       setLoading(false);

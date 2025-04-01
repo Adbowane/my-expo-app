@@ -8,9 +8,9 @@ const DashboardScreen = () => {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView style={tw`flex-1 bg-white`}
-        showsVerticalScrollIndicator={false}>
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-white`}
+        >
+    <ScrollView style={tw`flex-1 bg-white`}>
       {/* Header */}
       <View style={tw`flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200`}>
         <View style={tw`flex-row items-center`}>
@@ -119,11 +119,11 @@ const DashboardScreen = () => {
 
       {/* Safe Area Padding at Bottom */}
       <View style={{ paddingBottom: insets.bottom }} />
-    </View>
+    </ScrollView>
       {/* Navbar */}
       <Navbar />
 
-    </ScrollView>
+    </View>
   );
 };
 

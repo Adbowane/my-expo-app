@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import tw from 'twrnc';
+import { API_URL } from '../types';
 import axios from 'axios';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
@@ -51,11 +52,11 @@ const ExerciseDetails = () => {
         setLoading(true);
         
         // Récupérer l'exercice actuel
-        const exerciseResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/${id}`);
+        const exerciseResponse = await axios.get(`${API_URL}/api/exercises/${id}`);
         const fetchedExercise = exerciseResponse.data;
         
         // Récupérer le nom du programme
-        const programResponse = await axios.get(`http://172.31.16.1:3000/api/programs/${programId}`);
+        const programResponse = await axios.get(`${API_URL}/api/programs/${programId}`);
         setProgramName(programResponse.data.Program_Name);
         fetchedExercise.Program_Name = programResponse.data.Program_Name;
         
@@ -68,7 +69,7 @@ const ExerciseDetails = () => {
         
         // Récupérer tous les exercices du programme pour la navigation
         if (exercises.length === 0) {
-          const programExercisesResponse = await axios.get(`http://172.31.16.1:3000/api/exercises/program/${programId}`);
+          const programExercisesResponse = await axios.get(`${API_URL}/api/exercises/program/${programId}`);
           setProgramExercises(programExercisesResponse.data);
           
           // Trouver l'index de l'exercice actuel
@@ -80,7 +81,7 @@ const ExerciseDetails = () => {
           // Si nous avons déjà les IDs des exercices, récupérer leurs détails
           const fetchedExercises = await Promise.all(
             exercises.map((id: number) => 
-              axios.get(`http://172.31.16.1:3000/api/exercises/${id}`).then(res => res.data)
+              axios.get(`${API_URL}/api/exercises/${id}`).then(res => res.data)
             )
           );
           setProgramExercises(fetchedExercises);

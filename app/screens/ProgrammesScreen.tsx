@@ -6,6 +6,8 @@ import tw from 'twrnc';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import Navbar from '../components/Navbar';
+import { API_URL } from '../types';
+
 type RouteParams = {
   levelId?: number;
   goalId: number; // Maintenant obligatoire
@@ -59,7 +61,7 @@ export default function Programmes() {
           throw new Error('Goal ID is required');
         }
 
-        const response = await axios.get(`http://172.31.16.1:3000/api/programs/goal/${goalId}`);
+        const response = await axios.get(`${API_URL}/api/programs/goal/${goalId}`);
         
         const enrichedData = response.data.map((program: Program, index: number) => ({
           ...program,

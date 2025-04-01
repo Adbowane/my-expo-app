@@ -22,3 +22,5 @@ export type RootStackParamList = {
     NewProgrammeScreen: undefined;
     Goals: { id: number };
   };
+
+  export const API_URL = 'https://75ed-80-70-37-74.ngrok-free.app'; // Replace with your actual API URL

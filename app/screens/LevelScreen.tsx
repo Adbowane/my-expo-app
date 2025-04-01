@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { API_URL } from '../types';
 import { RootStackParamList } from '../types';
 import tw from 'twrnc';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,7 +39,7 @@ const LevelScreen = () => {
         // Réinitialisation de l'état d'erreur
         setError(null);
         // Appel API pour récupérer les niveaux
-        const response = await axios.get('http://172.31.16.1:3000/api/levels');
+        const response = await axios.get(`${API_URL}/api/levels`);
         // Enrichissement des données pour démonstration UI
         const enhancedLevels = response.data.map((level: Level, index: number) => ({
           ...level,

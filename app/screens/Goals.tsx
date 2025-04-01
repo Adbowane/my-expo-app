@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { API_URL } from '../types';
+
 import { 
   View, 
   Text, 
@@ -90,7 +92,7 @@ const Goals = () => {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await axios.get('http://172.31.16.1:3000/api/goals');
+        const response = await axios.get(`${API_URL}/api/goals`);
         
         // Vérification des URLs des images
         const processedGoals = response.data.map((goal: Goal) => {
