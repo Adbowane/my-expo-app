@@ -78,7 +78,7 @@ const LevelScreen = () => {
             >
               <View style={tw`flex-row items-center`}>
                 <Feather name="clipboard" size={24} color="white" style={tw`mr-3`} />
-                <Text style={tw`text-white font-bold text-lg`}>Placement test</Text>
+                <Text style={tw`text-white font-bold text-lg`}>Découvrir plus</Text>
               </View>
               <Feather name="chevron-right" size={24} color="white" />
             </TouchableOpacity>

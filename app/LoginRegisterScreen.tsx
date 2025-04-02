@@ -68,8 +68,8 @@ const LoginRegisterForm = () => {
         {/* Logo */}
         <View style={tw`items-center mb-8`}>
           <Image 
-            source={require('../assets/images/favicon.png')} // Remplacez par votre propre icône
-            style={tw`w-24 h-24 mb-4`}
+            source={require('../assets/images/logofa.png')} // Remplacez par votre propre icône
+            style={tw`w-50 h-50 mb-4`}
           />
         </View>
 
@@ -200,7 +200,7 @@ const LoginRegisterForm = () => {
                   style={tw`border border-gray-200 rounded-xl p-3 flex-1 items-center`}
                 >
                   <Image 
-                    source={require('../assets/images/favicon.png')} 
+                    source={require('../assets/images/facebook.png')} 
                     style={tw`w-6 h-6`}
                   />
                 </TouchableOpacity>
@@ -208,7 +208,7 @@ const LoginRegisterForm = () => {
                   style={tw`border border-gray-200 rounded-xl p-3 flex-1 items-center`}
                 >
                   <Image 
-                    source={require('../assets/images/favicon.png')} 
+                    source={require('../assets/images/google-icon.png')} 
                     style={tw`w-6 h-6`}
                   />
                 </TouchableOpacity>
