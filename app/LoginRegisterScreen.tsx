@@ -66,6 +66,11 @@ const LoginRegisterForm = () => {
     }
   };
 
+  // Désactiver la navigation directe vers LevelScreen
+  const handleProtectedNavigation = () => {
+    Alert.alert('Accès refusé', 'Veuillez vous connecter ou vous inscrire pour continuer.');
+  };
+
   return (
     <ScrollView 
       contentContainerStyle={tw`flex-grow bg-gradient-to-b from-purple-100 to-pink-100`}
@@ -86,9 +91,7 @@ const LoginRegisterForm = () => {
           <View style={tw`flex-row mb-8`}>
             <TouchableOpacity
               style={tw`flex-1 pb-3 ${isLoginMode ? 'border-b-2 border-indigo-600' : 'border-b border-gray-200'}`}
-              //Onpress pour Naviguer vers la page LevelScreen
-              onPress={() => navigation.navigate('LevelScreen', { name: 'DefaultName' })}
-            //   onPress={() => setIsLoginMode(true)}
+              onPress={isLoginMode ? handleProtectedNavigation : () => setIsLoginMode(true)}
             >
               <Text style={tw`text-center text-lg font-medium ${isLoginMode ? 'text-indigo-600' : 'text-gray-500'}`}>
                 Connexion
