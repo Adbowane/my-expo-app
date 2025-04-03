@@ -14,27 +14,29 @@ import Goals from './screens/Goals';
 import { RootStackParamList } from './types';
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
+import LoginRegisterScreen from './LoginRegisterScreen';
 import { AuthProvider, useAuth } from './screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginScreen">   
-        <Stack.Screen name="Programmes" component={Programmes} />
-        <Stack.Screen name="Goals" component={Goals} />
-        <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
-        <Stack.Screen name="IndexScreen" component={IndexScreen} />
-        <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="LevelScreen" component={LevelScreen} />
-        <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Exercises" component={Exercises} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="IndexScreen">
+          <Stack.Screen name="LoginRegisterScreen" component={LoginRegisterScreen} />   
+          <Stack.Screen name="Programmes" component={Programmes} />
+          <Stack.Screen name="Goals" component={Goals} />
+          <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
+          <Stack.Screen name="IndexScreen" component={IndexScreen} />
+          <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="LevelScreen" component={LevelScreen} />
+          <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />      
+          <Stack.Screen name="Exercises" component={Exercises} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthProvider>
   );
 };
 

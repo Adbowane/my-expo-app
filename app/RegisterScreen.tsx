@@ -37,6 +37,7 @@ const RegisterForm = () => {
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert('Échec de l\'inscription', error.message);
+        
       } else {
         Alert.alert('Échec de l\'inscription', 'Une erreur inconnue est survenue.');
       }

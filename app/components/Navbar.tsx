@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
-import { useAuth } from '../context/AuthContext'; // Assurez-vous que le chemin est correct
+import { useAuth, AuthProvider} from '../context/AuthContext'; // Assurez-vous que le chemin est correct
 
 // Définir le type de navigation basé sur RootStackParamList
 type NavigationProp = StackNavigationProp<RootStackParamList>;

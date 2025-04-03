@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { View, TextInput, Text, ActivityIndicator, Alert, TouchableOpacity, ScrollView, Image, StyleSheet } from 'react-native';
 import { useAuth, AuthProvider } from './context/AuthContext';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types';
 import tw from 'twrnc';
 
+type LogincreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
+
 const LoginRegisterForm = () => {
+  const navigation = useNavigation<LogincreenNavigationProp>();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
@@ -23,7 +30,7 @@ const LoginRegisterForm = () => {
     setIsLoading(true);
     try {
       await login(email, password);
-      Alert.alert('Succès', 'Connexion réussie');
+      navigation.navigate('LevelScreen', { name: 'DefaultName' }); // Naviguer vers LevelScreen
     } catch (error) {
       Alert.alert('Échec de connexion', error instanceof Error ? error.message : 'Une erreur inconnue est survenue.');
     } finally {
@@ -68,8 +75,8 @@ const LoginRegisterForm = () => {
         {/* Logo */}
         <View style={tw`items-center mb-8`}>
           <Image 
-            source={require('../assets/images/logofa.png')} // Remplacez par votre propre icône
-            style={tw`w-50 h-50 mb-4`}
+            source={require('../assets/images/LogoBgSo.png')} // Remplacez par votre propre icône
+            style={tw`w-24 h-24 mb-4`}
           />
         </View>
 
@@ -79,7 +86,9 @@ const LoginRegisterForm = () => {
           <View style={tw`flex-row mb-8`}>
             <TouchableOpacity
               style={tw`flex-1 pb-3 ${isLoginMode ? 'border-b-2 border-indigo-600' : 'border-b border-gray-200'}`}
-              onPress={() => setIsLoginMode(true)}
+              //Onpress pour Naviguer vers la page LevelScreen
+              onPress={() => navigation.navigate('LevelScreen', { name: 'DefaultName' })}
+            //   onPress={() => setIsLoginMode(true)}
             >
               <Text style={tw`text-center text-lg font-medium ${isLoginMode ? 'text-indigo-600' : 'text-gray-500'}`}>
                 Connexion

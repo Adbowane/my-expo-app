@@ -13,6 +13,7 @@ export type RootStackParamList = {
     Friends: undefined;
     Statistics: undefined;
     Academy: undefined;
+    LoginRegisterScreen:{ name: string };
     Strengthlog: undefined;
     SettingsScreen: undefined;
     DashboardScreen: undefined;

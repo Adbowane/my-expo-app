@@ -22,7 +22,7 @@ export default function IndexScreen() {
         </Text>
         <TouchableOpacity
           style={tw`bg-blue-500 py-3 px-6 rounded-lg`}
-          onPress={() => navigation.navigate('LevelScreen', { name: 'default' })}
+          onPress={() => navigation.navigate('LoginRegisterScreen', { name: 'default' })}
         >
           <Text style={tw`text-white font-bold text-lg`}>Commencer l'aventure</Text>
         </TouchableOpacity>
