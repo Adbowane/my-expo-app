@@ -1,47 +1,72 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { API_URL } from '../types';
+type User = {
+  userId: number;
+  email: string;
+  token: string;
+};
 
-interface AuthContextType {
-  token: string | null;
-  userId: string | null;
-  isLoading: boolean;
+type AuthContextType = {
+  user: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, surname: string) => Promise<void>;
   logout: () => Promise<void>;
-}
+  isLoading: boolean;
+};
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: async () => {},
+  register: async () => {},
+  logout: async () => {},
+  isLoading: true,
+});
 
-export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Vérifier le token au chargement
   useEffect(() => {
-    const loadToken = async () => {
-      const storedToken = await AsyncStorage.getItem('token');
-      const storedUserId = await AsyncStorage.getItem('userId');
-      
-      if (storedToken && storedUserId) {
-        setToken(storedToken);
-        setUserId(storedUserId);
+    const checkLoggedIn = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error('Failed to load user data', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-    
-    loadToken();
+
+    checkLoggedIn();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('https://75ed-80-70-37-74.ngrok-free.app/api/login', { email, password });
-      const { token, userId } = response.data;
-      
-      await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('userId', userId.toString());
-      setToken(token);
-      setUserId(userId);
+      const response = await fetch(`${API_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      const userData = {
+        userId: data.userId,
+        email: data.email,
+        token: data.token,
+      };
+
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -50,7 +75,26 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const register = async (email: string, password: string, name: string, surname: string) => {
     try {
-      await axios.post('https://75ed-80-70-37-74.ngrok-free.app/api/register', { email, password, name, surname });
+      const response = await fetch(`${API_URL}/api/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, surname }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      const data = await response.json();
+      const userData = {
+        userId: data.userId,
+        email: data.email,
+        token: data.token,
+      };
+
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -59,18 +103,15 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('userId');
-      setToken(null);
-      setUserId(null);
+      await AsyncStorage.removeItem('user');
+      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
-      throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ token, userId, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { API_URL } from '../types';
@@ -9,148 +9,177 @@ import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { Feather, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext'; // Import du hook useAuth
 
-// Type de navigation pour l'écran de niveaux
 type LevelScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LevelScreen'>;
 
-// Interface pour le type Level avec des propriétés supplémentaires pour l'UI
 interface Level {
   Level_Id: number;
   Level_Name: string;
   Image?: string;
-  isCompleted?: boolean;
-  isProcessing?: boolean;
-  isLocked?: boolean;
+  requiredXP?: number;
+}
+
+interface UserProgress {
+  currentLevel: number;
+  currentXP: number;
+  unlockedLevels: number[];
 }
 
 const LevelScreen = () => {
-  // Initialisation du hook de navigation
   const navigation = useNavigation<LevelScreenNavigationProp>();
-  
-  // États pour gérer les données, le chargement et les erreurs
+  const { user } = useAuth();
   const [levels, setLevels] = useState<Level[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Effet pour récupérer les données de niveaux depuis l'API
+  // Fetch levels and user progress
   useEffect(() => {
-    const fetchLevels = async () => {
+    const fetchData = async () => {
       try {
-        // Réinitialisation de l'état d'erreur
+        setLoading(true);
         setError(null);
-        // Appel API pour récupérer les niveaux
-        const response = await axios.get(`${API_URL}/api/levels`);
-        // Enrichissement des données pour démonstration UI
-        const enhancedLevels = response.data.map((level: Level, index: number) => ({
-          ...level,
-          isCompleted: index < 2 ,  // Le premier niveau est marqué comme complété
-          isProcessing: index === 2,  // Le deuxième niveau est en cours de traitement
-          isLocked: index === 3        // Les niveaux après le second sont verrouillés
-        }));
-        setLevels(enhancedLevels);
+        
+        // Fetch all available levels
+        const levelsResponse = await axios.get(`${API_URL}/api/levels`);
+        
+        // Fetch user-specific progress if logged in
+        if (user?.userId) {
+          const progressResponse = await axios.get(`${API_URL}/api/user/progress/${user.userId}`, {
+            headers: {
+              Authorization: `Bearer ${user.token}`
+            }
+          });
+          setUserProgress(progressResponse.data);
+        }
+        
+        setLevels(levelsResponse.data);
       } catch (err) {
-        // Gestion des erreurs
-        console.error('Error fetching levels:', err);
-        setError('Impossible de récupérer les niveaux.');
-        Alert.alert('Erreur', 'Impossible de récupérer les niveaux.');
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again.');
+        Alert.alert('Error', 'Failed to load levels data');
       } finally {
-        // Fin du chargement dans tous les cas
         setLoading(false);
       }
     };
 
-    // Exécution de la fonction de récupération des données
-    fetchLevels();
-  }, []);
+    fetchData();
+  }, [user]);
 
-  // Fonction pour rendre une carte de niveau
+  // Determine level status for UI
+  const getLevelStatus = (levelId: number) => {
+    if (!userProgress) return 'locked';
+    
+    if (levelId < userProgress.currentLevel) return 'completed';
+    if (levelId === userProgress.currentLevel) return 'current';
+    return 'locked';
+  };
+
+  // Handle level selection
+  const handleSelectLevel = (levelId: number) => {
+    const status = getLevelStatus(levelId);
+    
+    if (status === 'locked') {
+      Alert.alert(
+        'Level Locked',
+        `You need to complete level ${userProgress?.currentLevel} first!`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    
+    navigation.navigate('Goals', { id: levelId });
+  };
+
+  // Render level card
   const renderLevelCard = (level: Level, index: number) => {
+    const status = getLevelStatus(level.Level_Id);
     const isFirst = index === 0;
 
     return (
       <View key={level.Level_Id} style={tw`mb-4`}>
-        {/* Affiche le test de placement uniquement avant le premier niveau */}
         {isFirst && (
           <View style={tw`mb-4`}>
             <TouchableOpacity 
               style={tw`bg-blue-400 rounded-xl p-4 flex-row items-center justify-between`}
-              onPress={() => navigation.navigate('Goals', { id: 0 })}
+              onPress={() => navigation.navigate('DashboardScreen')}
             >
               <View style={tw`flex-row items-center`}>
                 <Feather name="clipboard" size={24} color="white" style={tw`mr-3`} />
-                <Text style={tw`text-white font-bold text-lg`}>Découvrir plus</Text>
+                <Text style={tw`text-white font-bold text-lg`}>View My Progress</Text>
               </View>
               <Feather name="chevron-right" size={24} color="white" />
             </TouchableOpacity>
-            {/* Point de connexion entre le test et le premier niveau */}
             <View style={tw`flex-row justify-center mt-2 mb-2`}>
               <View style={tw`w-2 h-2 bg-gray-400 rounded-full`}></View>
             </View>
           </View>
         )}
         
-        {/* Carte de niveau */}
         <TouchableOpacity 
-          style={tw`bg-white rounded-xl p-4 ${level.isLocked ? 'opacity-50' : ''}`}
-          onPress={() => !level.isLocked && navigation.navigate('Goals', { id: level.Level_Id })}
-          disabled={level.isLocked}
+          style={[
+            tw`bg-white rounded-xl p-4 shadow-sm`,
+            status === 'locked' && tw`opacity-60`,
+            status === 'current' && styles.currentLevel
+          ]}
+          onPress={() => handleSelectLevel(level.Level_Id)}
         >
           <View style={tw`flex-row justify-between items-center`}>
             <View style={tw`flex-row items-center`}>
-              {/* Image du niveau améliorée - plus grande et flottante */}
               <View style={tw`w-16 h-16 mr-4 justify-center items-center`}>
                 <Image 
                   source={level.Image ? { uri: level.Image } : require('../../assets/musclay.png')} 
-                  style={tw`w-16 h-16 rounded-xl shadow-lg`} 
+                  style={tw`w-16 h-16 rounded-xl`} 
                   resizeMode="cover"
                 />
-                {/* Effet d'ombre pour donner l'impression que l'image flotte */}
                 <View style={tw`absolute -bottom-1 w-12 h-1 bg-gray-200 rounded-full opacity-70`}></View>
               </View>
               
-              {/* Informations textuelles du niveau */}
               <View>
                 <Text style={tw`font-bold text-lg text-gray-800`}>{level.Level_Name}</Text>
-                {level.isCompleted && (
-                  <Text style={tw`text-gray-500 text-xs`}>This part is complete</Text>
+                {status === 'completed' && (
+                  <Text style={tw`text-green-500 text-xs`}>Completed</Text>
                 )}
-                {level.isLocked && (
-                  <Text style={tw`text-gray-500 text-xs`}>This part is locked</Text>
+                {status === 'locked' && (
+                  <Text style={tw`text-gray-500 text-xs`}>Locked</Text>
                 )}
-                {level.isProcessing && (
-                  <Text style={tw`text-gray-500 text-xs`}>This part is in progress</Text>
+                {status === 'current' && (
+                  <View style={tw`flex-row items-center`}>
+                    <Text style={tw`text-blue-500 text-xs mr-2`}>In Progress</Text>
+                    {userProgress && (
+                      <Text style={tw`text-xs text-gray-500`}>
+                        {userProgress.currentXP}/{level.requiredXP || 1000} XP
+                      </Text>
+                    )}
+                  </View>
                 )}
               </View>
             </View>
             
-            {/* Indicateurs d'état du niveau */}
-            {level.isCompleted ? (
-              // Icône de validation pour niveau complété
+            {status === 'completed' ? (
               <View style={tw`w-6 h-6 bg-green-500 rounded-full justify-center items-center`}>
-              <Feather name="check" size={16} color="white" />
+                <Feather name="check" size={16} color="white" />
               </View>
-            ) : level.isLocked ? (
-              // Icône de cadenas pour niveau verrouillé
+            ) : status === 'locked' ? (
               <Feather name="lock" size={20} color="gray" />
-            ) : level.isProcessing ? (
-              // Barre de progression pour niveau en cours
-              <View style={tw`w-24`}>
-              <LinearGradient 
-                colors={['#FF4B8B', '#A450F8']} 
-                start={[0, 0]} 
-                end={[1, 0]} 
-                style={tw`h-1 rounded-full w-full`}
-              />
-              </View>
             ) : (
-              // Niveau non commencé
-              <Feather name="chevron-right" size={20} color="gray" />
+              <View style={tw`w-24`}>
+                <LinearGradient 
+                  colors={['#FF4B8B', '#A450F8']} 
+                  start={[0, 0]} 
+                  end={[1, 0]} 
+                  style={[
+                    tw`h-1 rounded-full`,
+                    { width: `${userProgress ? (userProgress.currentXP / (level.requiredXP || 1000)) * 100 : 0}%` }
+                  ]}
+                />
+              </View>
             )}
           </View>
         </TouchableOpacity>
         
-        {/* Points de connexion entre les niveaux non verrouillés */}
-        {!level.isLocked && index < levels.length - 1 && (
+        {status !== 'locked' && index < levels.length - 1 && (
           <View style={tw`flex-row justify-center mt-2 mb-2`}>
             <View style={tw`w-2 h-2 bg-gray-400 rounded-full`}></View>
           </View>
@@ -159,15 +188,37 @@ const LevelScreen = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={tw`flex-1 justify-center items-center bg-blue-50`}>
+        <ActivityIndicator size="large" color="#9188F1" />
+        <Text style={tw`mt-4 text-gray-700`}>Loading your levels...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={tw`flex-1 justify-center items-center bg-blue-50`}>
+        <Ionicons name="warning-outline" size={48} color="#ff4444" />
+        <Text style={tw`mt-4 text-lg text-gray-700 px-8 text-center`}>{error}</Text>
+        <TouchableOpacity
+          style={tw`mt-6 bg-violet-600 px-6 py-3 rounded-full`}
+          onPress={() => {
+            setError(null);
+            setLoading(true);
+            // Retry fetching data
+          }}
+        >
+          <Text style={tw`text-white font-bold`}>Try Again</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    // Conteneur principal avec gestion des zones sécurisées (notch, etc.)
     <SafeAreaView style={tw`flex-1 bg-blue-50`}>
-      {/* Barre d'état personnalisée */}
-     
-      
-      {/* Contenu principal défilable */}
       <ScrollView contentContainerStyle={tw`p-4`}>
-        {/* En-tête avec image de fond */}
         <View style={tw`mb-6 relative`}>
           <Image 
             source={require('../../assets/musclay.png')} 
@@ -175,28 +226,33 @@ const LevelScreen = () => {
             resizeMode="cover" 
           />
           <View style={tw`absolute bottom-4 left-4`}>
-            <Text style={tw`text-2xl font-bold text-white`}>Level</Text>
-            <Text style={tw`text-white`}>How would you rate your English</Text>
+            <Text style={tw`text-2xl font-bold text-white`}>Your Training Levels</Text>
+            <Text style={tw`text-white`}>
+              {user 
+                ? `Current Level: ${userProgress?.currentLevel || 1}`
+                : 'Sign in to track your progress'}
+            </Text>
           </View>
         </View>
         
-        {/* Affichage conditionnel selon l'état (chargement, erreur, données) */}
-        {loading ? (
-          // Indicateur de chargement
-          <ActivityIndicator size="large" color="#9188F1" style={tw`mt-10`} />
-        ) : error ? (
-          // Message d'erreur
-          <Text style={tw`text-red-500 text-center mb-4`}>{error}</Text>
-        ) : (
-          // Liste des niveaux
-          levels.map((level, index) => renderLevelCard(level, index))
-        )}
+        {levels.map((level, index) => renderLevelCard(level, index))}
       </ScrollView>
       
-      {/* Navbar */}
       <Navbar />
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  currentLevel: {
+    borderWidth: 2,
+    borderColor: '#A450F8',
+    shadowColor: '#A450F8',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+});
 
 export default LevelScreen;

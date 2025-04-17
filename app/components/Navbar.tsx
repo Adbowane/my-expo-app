@@ -37,10 +37,10 @@ export default function Navbar() {
       
       <TouchableOpacity 
         style={tw`items-center`} 
-        onPress={() => navigation.navigate('Exercises', { id: 1 })}
+        onPress={() => navigation.navigate('LevelScreen', { name: 'default' })}
       >
         <Ionicons name="flame-outline" size={24} color="#888" />
-        <Text style={tw`text-xs text-gray-500 mt-1`}>Exercices</Text>
+        <Text style={tw`text-xs text-gray-500 mt-1`}>Niveaux</Text>
       </TouchableOpacity>
       
       <TouchableOpacity style={tw`items-center`}>
