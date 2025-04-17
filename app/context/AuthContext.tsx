@@ -72,33 +72,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadAuthData();
   }, []);
 
-  // Fonction de connexion
-  const login = async (email: string, password: string) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/login`, { email, password });
-      const { token, user: userData, avatar } = response.data;
+  // Dans AuthContext.tsx, fonction login
+const login = async (email: string, password: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/api/login`, { email, password });
+    const { token, user: userData, avatar } = response.data;
 
-      const user: User = {
-        userId: userData.User_Id,
-        email: userData.Email,
-        name: userData.Name,
-        surname: userData.Surname,
-        currentLevel: avatar?.Current_Level || 1,
-      };
+    const user: User = {
+      userId: userData.User_Id,
+      email: userData.Email,
+      name: userData.Name,
+      surname: userData.Surname,
+      currentLevel: avatar?.Current_Level || 1,
+    };
 
-      // Stocker le token et les données utilisateur
-      await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
-      setToken(token);
-      setUser(user);
+    console.log('User stored after login:', user); // Log pour vérifier userId
+    await AsyncStorage.setItem('token', token);
+    await AsyncStorage.setItem('user', JSON.stringify(user));
+    setToken(token);
+    setUser(user);
 
-      // Configurer l'en-tête Authorization pour les requêtes futures
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } catch (error) {
-      console.error('Erreur de connexion:', error);
-      throw new Error('Échec de la connexion. Vérifiez vos identifiants.');
-    }
-  };
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } catch (error) {
+    console.error('Erreur de connexion:', error);
+    throw new Error('Échec de la connexion. Vérifiez vos identifiants.');
+  }
+};
 
   // Fonction d'inscription
   const register = async (email: string, password: string, name: string, surname: string) => {

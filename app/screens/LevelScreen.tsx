@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { Feather } from '@expo/vector-icons';
-import { useAuth } from '../context/AuthContext'; // Import du hook useAuth
+import { useAuth } from '../context/AuthContext';
 
 // Type de navigation pour l'écran de niveaux
 type LevelScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LevelScreen'>;
@@ -25,33 +25,44 @@ interface Level {
 
 const LevelScreen = () => {
   const navigation = useNavigation<LevelScreenNavigationProp>();
-  const { user } = useAuth(); // Récupération de l'utilisateur connecté via useAuth
+  const { user, isLoading } = useAuth(); // Récupérer user et isLoading
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [userLevel, setUserLevel] = useState<number | null>(null); // Niveau actuel de l'utilisateur
 
-  // Vérification si l'utilisateur est connecté
+  // Charger les niveaux en fonction du niveau de l'utilisateur
   useEffect(() => {
-    if (!user?.userId) {
-      setError('Vous devez être connecté pour voir vos niveaux.');
-      setLoading(false);
-      Alert.alert('Erreur', 'Veuillez vous connecter.');
+    // Attendre que le chargement initial soit terminé
+    if (isLoading) {
+      console.log('AuthContext is still loading...');
       return;
     }
 
-    const fetchUserDataAndLevels = async () => {
+    // Vérifier si l'utilisateur est connecté
+    if (!user?.userId) {
+      console.log('No user found, redirecting to Login');
+      setError('Vous devez être connecté pour voir vos niveaux.');
+      setLoading(false);
+      Alert.alert('Erreur', 'Veuillez vous connecter.', [
+        { text: 'OK', onPress: () => navigation.navigate('Login') }, // Redirection vers l'écran de connexion
+      ]);
+      return;
+    }
+
+    console.log('User loaded:', { userId: user.userId, currentLevel: user.currentLevel });
+
+    const fetchLevels = async () => {
       try {
         setError(null);
-        // Récupérer le niveau actuel de l'utilisateur depuis User_Avatar
-        const userResponse = await axios.get(`${API_URL}/api/user-avatar/${user.userId}`);
-        const currentLevel = userResponse.data.Current_Level || 1;
-        setUserLevel(currentLevel);
+        // Utiliser currentLevel depuis user
+        const currentLevel = user.currentLevel || 1;
 
         // Récupérer tous les niveaux disponibles
         const levelsResponse = await axios.get(`${API_URL}/api/levels`);
+        console.log('Levels fetched:', levelsResponse.data);
+
         // Enrichir les niveaux avec l'état basé sur le niveau de l'utilisateur
-        const enhancedLevels = levelsResponse.data.map((level: Level, index: number) => ({
+        const enhancedLevels = levelsResponse.data.map((level: Level) => ({
           ...level,
           isCompleted: level.Level_Id < currentLevel,
           isProcessing: level.Level_Id === currentLevel,
@@ -59,16 +70,16 @@ const LevelScreen = () => {
         }));
         setLevels(enhancedLevels);
       } catch (err) {
-        console.error('Erreur lors de la récupération des données:', err);
-        setError('Impossible de récupérer les niveaux ou les données utilisateur.');
+        console.error('Erreur lors de la récupération des niveaux:', err);
+        setError('Impossible de récupérer les niveaux.');
         Alert.alert('Erreur', 'Impossible de récupérer les données.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserDataAndLevels();
-  }, [user?.userId]);
+    fetchLevels();
+  }, [user?.userId, user?.currentLevel, isLoading, navigation]);
 
   // Fonction pour rendre une carte de niveau
   const renderLevelCard = (level: Level, index: number) => {
@@ -165,7 +176,7 @@ const LevelScreen = () => {
             <Text style={tw`text-white`}>Votre progression fitness</Text>
           </View>
         </View>
-        {loading ? (
+        {isLoading || loading ? (
           <ActivityIndicator size="large" color="#9188F1" style={tw`mt-10`} />
         ) : error ? (
           <Text style={tw`text-red-500 text-center mb-4`}>{error}</Text>

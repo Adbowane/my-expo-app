@@ -22,10 +22,10 @@ import axios from 'axios';
 import Navbar from 'app/components/Navbar';
 
 // Définition du type pour les paramètres de route
-type RouteParams = {
-  levelId?: number;
-  goalId?: number;
-};
+// type RouteParams = {
+//   levelId?: number;
+//   goalId?: number;
+// };
 
 // Définition correcte du type de navigation
 type RootStackParamList = {
