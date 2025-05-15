@@ -1,17 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { API_URL } from '../types';
-
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
   ActivityIndicator,
   Image,
   Dimensions,
   StatusBar,
   Animated,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -20,14 +19,9 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import tw from 'twrnc';
 import axios from 'axios';
 import Navbar from 'app/components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
-// Définition du type pour les paramètres de route
-// type RouteParams = {
-//   levelId?: number;
-//   goalId?: number;
-// };
-
-// Définition correcte du type de navigation
+// Types pour la navigation
 type RootStackParamList = {
   Goals: undefined;
   Programmes: { goalId: number };
@@ -41,46 +35,48 @@ type RootStackParamList = {
 
 type GoalsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Goals'>;
 
+// Type pour un objectif, incluant le statut
 type Goal = {
   Goal_Id: number;
   Level_Id: number;
   Goal_Name: string;
   Description: string;
-  Image: string;
+  Image: string | null;
   ImageGoal: string | null;
   Duration: string;
   Improvement: string;
   Followers: number;
   Impact: string;
   Streak: string;
-
+  status: 'completed' | 'in_progress'; // Ajouter le statut
 };
 
-// Images de secours par catégorie
+// Images de secours
 export const fallbackImages = {
   'Perte de poids': 'https://tse4.mm.bing.net/th?id=OIG3.RAolgCJjIH4B4ovrt1tf&pid=ImgGn',
   'Gain musculaire': 'https://tse4.mm.bing.net/th?id=OIG3.RAolgCJjIH4B4ovrt1tf&pid=ImgGn',
   'Maintien de forme': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=1169&auto=format&fit=crop',
   'Endurance cardio': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1170&auto=format&fit=crop',
   'Force maximale': 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1170&auto=format&fit=crop',
-  'default': 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1170&auto=format&fit=crop'
+  default: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1170&auto=format&fit=crop',
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const CARD_WIDTH = SCREEN_WIDTH * 0.8; // Augmenté pour avoir des cartes plus grandes
+const CARD_WIDTH = SCREEN_WIDTH * 0.8;
 
 const Goals = () => {
+  const { user, token } = useAuth(); // Récupérer user et token depuis AuthContext
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [imageErrors, setImageErrors] = useState<{[key: number]: boolean}>({});
-  
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+
   const navigation = useNavigation<GoalsScreenNavigationProp>();
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
 
-  // Mapping des icônes pour chaque type d'objectif
+  // Mapping des icônes
   const goalIcons: { [key: string]: string } = {
     'Perte de poids': 'scale-balance',
     'Gain musculaire': 'weight-lifter',
@@ -91,21 +87,30 @@ const Goals = () => {
 
   useEffect(() => {
     const fetchGoals = async () => {
+      if (!user || !token) {
+        console.error('Utilisateur non connecté');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get(`${API_URL}/api/goals`);
-        
-        // Vérification des URLs des images
+        const response = await axios.get(`${API_URL}/api/goals/user/${user.userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Ajouter le token
+          },
+        });
+
+        // Traiter les URLs des images
         const processedGoals = response.data.map((goal: Goal) => {
-          console.log('Original Image URL:', goal.Image); // Log original image URL
-          // Utiliser l'image de la base de données par défaut
+          console.log('Original Image URL:', goal.Image);
           goal.ImageGoal = goal.Image || fallbackImages.default;
-          console.log('Processed Image URL:', goal.ImageGoal); // Log processed image URL
+          console.log('Processed Image URL:', goal.ImageGoal);
           return goal;
         });
-        
+
         setGoals(processedGoals);
-        
-        // Sélectionner le premier par défaut
+
+        // Sélectionner le premier objectif par défaut
         if (processedGoals.length > 0) {
           setSelectedGoal(processedGoals[0].Goal_Id);
         }
@@ -117,11 +122,11 @@ const Goals = () => {
     };
 
     fetchGoals();
-  }, []);
+  }, [user, token]); // Dépendances : user et token
 
   const handleImageError = (goalId: number) => {
-    console.log('Image failed to load for goal ID:', goalId); // Log image load failure
-    setImageErrors(prev => ({...prev, [goalId]: true}));
+    console.log('Image failed to load for goal ID:', goalId);
+    setImageErrors((prev) => ({ ...prev, [goalId]: true }));
   };
 
   const getImageSource = (item: Goal) => {
@@ -134,10 +139,9 @@ const Goals = () => {
   const handleSelectGoal = (goalId: number, index: number) => {
     setSelectedGoal(goalId);
     setCurrentIndex(index);
-    
     flatListRef.current?.scrollToIndex({
-      index: index,
-      animated: true
+      index,
+      animated: true,
     });
   };
 
@@ -146,7 +150,7 @@ const Goals = () => {
   };
 
   const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50
+    itemVisiblePercentThreshold: 50,
   };
 
   const onViewableItemsChanged = ({ viewableItems }: any) => {
@@ -156,9 +160,7 @@ const Goals = () => {
     }
   };
 
-  const viewabilityConfigCallbackPairs = useRef([
-    { viewabilityConfig, onViewableItemsChanged }
-  ]);
+  const viewabilityConfigCallbackPairs = useRef([{ viewabilityConfig, onViewableItemsChanged }]);
 
   if (loading) {
     return (
@@ -180,19 +182,16 @@ const Goals = () => {
             <Text style={tw`text-xs font-medium text-white`}>Fitness</Text>
           </View>
         </View>
-        
+
         {/* Main Title */}
         <View style={tw`px-5 mt-2`}>
-          <Text style={tw`text-3xl font-extrabold tracking-tight`}>
-            WEIGHT EXERCISES
-          </Text>
-          
+          <Text style={tw`text-3xl font-extrabold tracking-tight`}>WEIGHT EXERCISES</Text>
           {/* Progress Dots */}
           <View style={tw`flex-row my-3`}>
             {[0, 1, 2, 3, 4].map((dot, index) => (
-              <View 
-                key={index} 
-                style={tw`h-2 w-2 rounded-full mx-1 ${index <= 2 ? 'bg-black' : 'bg-gray-300'}`} 
+              <View
+                key={index}
+                style={tw`h-2 w-2 rounded-full mx-1 ${index <= 2 ? 'bg-black' : 'bg-gray-300'}`}
               />
             ))}
           </View>
@@ -205,64 +204,53 @@ const Goals = () => {
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          snapToInterval={CARD_WIDTH + 16} // Ajout de la marge
+          snapToInterval={CARD_WIDTH + 16}
           decelerationRate="fast"
           contentContainerStyle={tw`py-4 px-2`}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: false }
-          )}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+            useNativeDriver: false,
+          })}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
           keyExtractor={(item) => item.Goal_Id.toString()}
           renderItem={({ item, index }) => {
             const isSelected = item.Goal_Id === selectedGoal;
-            
             return (
               <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => handleSelectGoal(item.Goal_Id, index)}
-                style={[
-                  { width: CARD_WIDTH, marginHorizontal: 8 },
-                  tw`rounded-3xl`,
-                  isSelected && tw`border-4 border-purple-500` // Entourer l'élément sélectionné
-                ]}
+                style={[{ width: CARD_WIDTH, marginHorizontal: 8 }, tw`rounded-3xl`, isSelected && tw`border-4 border-purple-500`]}
               >
                 <View style={tw`bg-white rounded-3xl shadow-md overflow-hidden h-160`}>
                   {/* Goal Image and Details with Gradient */}
                   <View style={tw`h-2/3 justify-center items-center bg-gray-100 relative`}>
-                    {/* Image de l'objectif avec gestion des erreurs */}
-                    <Image 
+                    <Image
                       source={{ uri: getImageSource(item) as string | undefined }}
                       style={tw`absolute w-full h-full`}
                       resizeMode="cover"
                       onError={() => handleImageError(item.Goal_Id)}
                     />
-                    
-                    {/* Gradient overlay pour meilleure visibilité du texte */}
                     <LinearGradient
                       colors={['transparent', 'rgba(102, 51, 153, 0.8)']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={tw`absolute w-full h-full`}
                     />
-                    
-                    {/* Nom de l'objectif en grand à droite */}
                     <View style={tw`absolute right-4 top-8 w-40 items-end`}>
                       <Text style={tw`text-4xl font-black text-white text-right leading-tight`}>
                         {item.Goal_Name.toUpperCase()}
                       </Text>
+                      {/* Afficher le statut de l'objectif */}
+                      <Text style={tw`text-sm font-bold text-white mt-2`}>
+                        Statut: {item.status === 'completed' ? 'Complété' : 'En cours'}
+                      </Text>
                     </View>
-                    
-                    {/* Icône pour l'objectif */}
                     <View style={tw`absolute bottom-4 left-4 bg-black/20 p-3 rounded-full`}>
-                      <MaterialCommunityIcons 
-                        name={getIconNameForGoal(item.Goal_Name) as any} 
-                        size={32} 
-                        color="#fff" 
+                      <MaterialCommunityIcons
+                        name={getIconNameForGoal(item.Goal_Name) as any}
+                        size={32}
+                        color="#fff"
                       />
                     </View>
-                    
-                    {/* Statistiques */}
                     <View style={tw`absolute right-4 bottom-16`}>
                       <View style={tw`items-end mb-6`}>
                         <Text style={tw`text-gray-200 text-xs mb-1`}>SUIVIS PAR</Text>
@@ -273,29 +261,22 @@ const Goals = () => {
                           <MaterialCommunityIcons name="account-group" size={24} color="#fff" />
                         </View>
                       </View>
-                      
                       <View style={tw`items-end mb-6`}>
                         <Text style={tw`text-gray-200 text-xs mb-1`}>STREAK MOYEN</Text>
                         <Text style={tw`text-lg font-bold text-white`}>{item.Streak}</Text>
                       </View>
-                      
                       <View style={tw`items-end`}>
                         <Text style={tw`text-gray-200 text-xs mb-1`}>IMPACT MOYEN</Text>
                         <Text style={tw`text-lg font-bold text-white`}>{item.Impact}</Text>
                       </View>
                     </View>
                   </View>
-                  
-                  {/* Détails en bas */}
                   <View style={tw`bg-white p-4 rounded-t-3xl -mt-6 flex-1`}>
                     <Text style={tw`text-gray-500 text-sm font-medium mb-1`}>Détails de l'intervention</Text>
-                    
-                    {/* Navigation par onglets */}
                     <View style={tw`flex-row mb-4`}>
                       <Text style={tw`text-xl font-bold mr-4 uppercase`}>APERÇU</Text>
                       <Text style={tw`text-xl font-bold text-gray-300 uppercase`}>INFO SCIENTIFIQUE</Text>
                     </View>
-                    
                     <View style={tw`flex-row justify-between mb-2`}>
                       <View style={tw`flex-1 mr-2 bg-gray-100 p-3 rounded-lg`}>
                         <Text style={tw`text-xs text-gray-500`}>DURÉE RECOMMANDÉE</Text>
@@ -312,13 +293,13 @@ const Goals = () => {
             );
           }}
         />
-        
+
         {/* Bouton Suivant */}
         {selectedGoal && (
           <View style={tw`px-5 mb-24`}>
             <TouchableOpacity
               style={tw`bg-violet-600 p-4 rounded-full items-center shadow-md`}
-              onPress={() => navigation.navigate('Programmes', { goalId: selectedGoal })} // Pass goalId
+              onPress={() => navigation.navigate('Programmes', { goalId: selectedGoal })}
             >
               <Text style={tw`text-lg font-bold text-white`}>Commencer cet objectif</Text>
             </TouchableOpacity>
@@ -326,11 +307,9 @@ const Goals = () => {
         )}
       </ScrollView>
 
-     {/* Navbar */}
-     <Navbar />
-    
+      <Navbar />
     </View>
   );
-}
+};
 
 export default Goals;
