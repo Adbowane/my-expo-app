@@ -184,7 +184,7 @@ const Goals = () => {
         {/* Main Title */}
         <View style={tw`px-5 mt-2`}>
           <Text style={tw`text-3xl font-extrabold tracking-tight`}>
-            WEIGHT EXERCISES
+            Choisissez votre objectif
           </Text>
           
           {/* Progress Dots */}
