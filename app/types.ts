@@ -28,4 +28,4 @@ export type RootStackParamList = {
     Goals: { id: number };
   };
 
-  export const API_URL = 'https://956b-2a02-8440-a10a-9451-919f-693b-33c7-1a4.ngrok-free.app'; // Replace with your actual API URL
+  export const API_URL = 'https://17c3460a900e.ngrok-free.app'; 

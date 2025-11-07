@@ -25,7 +25,7 @@ interface Level {
 
 const LevelScreen = () => {
   const navigation = useNavigation<LevelScreenNavigationProp>();
-  const { user, isLoading } = useAuth(); // Récupérer user et isLoading
+  const { user, isLoading } = useAuth(); //git  Récupérer user et isLoading
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
