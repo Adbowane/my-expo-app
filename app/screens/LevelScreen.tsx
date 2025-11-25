@@ -44,7 +44,32 @@ const LevelScreen = () => {
       setError('Vous devez être connecté pour voir vos niveaux.');
       setLoading(false);
       Alert.alert('Erreur', 'Veuillez vous connecter.', [
-        { text: 'OK', onPress: () => navigation.navigate('Login') }, // Redirection vers l'écran de connexion
+        {
+          text: 'OK',
+          onPress: () => {
+            // Si LevelScreen est dans un navigator imbriqué, essayer le parent
+            const parentNav = (navigation as any).getParent?.();
+            if (parentNav && typeof parentNav.navigate === 'function') {
+              // Naviguer via le parent navigator (route 'Login' doit exister au niveau racine)
+              parentNav.navigate('Login' as never);
+              return;
+            }
+            // Fallback : réinitialiser la stack de navigation pour aller vers Login
+            if (typeof (navigation as any).reset === 'function') {
+              (navigation as any).reset({
+                index: 0,
+                routes: [{ name: 'Login' as never }],
+              });
+              return;
+            }
+            // Last resort: essayer la navigation locale (peut échouer si route inexistante dans ce navigator)
+            try {
+              navigation.navigate('Login' as never);
+            } catch (e) {
+              console.warn('Unable to navigate to Login from LevelScreen:', e);
+            }
+          },
+        },
       ]);
       return;
     }

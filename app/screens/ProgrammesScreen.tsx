@@ -136,7 +136,7 @@ export default function Programmes() {
 
   const renderItem = ({ item, index }: { item: Program; index: number }) => (
     <TouchableOpacity
-      style={tw`mx-2 bg-white rounded-3xl shadow-lg overflow-hidden w-${Math.round(ITEM_WIDTH)}`}
+      style={tw`mx-2 bg-white rounded-3xl shadow-lg overflow-hidden w-${Math.round(ITEM_WIDTH)} h-100`}
       onPress={() => handleSelectProgram(item.Program_Id, index)}
       activeOpacity={0.9}
     >
@@ -189,7 +189,7 @@ export default function Programmes() {
       </View>
       
       {selectedProgram && (
-        <View style={tw`px-5 pb-24`}>
+        <View style={tw`px-5 pb-12`}>
           <TouchableOpacity
             style={tw`bg-violet-500 p-4 rounded-full items-center shadow-md`}
             onPress={() => navigation.navigate('Exercises', { programId: selectedProgram })}
