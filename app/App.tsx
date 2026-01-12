@@ -16,7 +16,7 @@ import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import LoginRegisterScreen from './LoginRegisterScreen';
 import { AuthProvider, useAuth } from './screens';
-
+import CharacterScreen from './screens/CharacterScreen';
 const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
@@ -24,7 +24,7 @@ const App = () => {
     <AuthProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="IndexScreen">
-          <Stack.Screen name="LoginRegisterScreen" component={LoginRegisterScreen} />   
+          <Stack.Screen name="LoginRegisterScreen" component={LoginRegisterScreen} />
           <Stack.Screen name="Programmes" component={Programmes} />
           <Stack.Screen name="Goals" component={Goals} />
           <Stack.Screen name="DashboardScreen" component={DashboardScreen} />
@@ -32,8 +32,9 @@ const App = () => {
           <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="LevelScreen" component={LevelScreen} />
-          <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />      
+          <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />
           <Stack.Screen name="Exercises" component={Exercises} />
+          <Stack.Screen name="CharacterScreen" component={CharacterScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

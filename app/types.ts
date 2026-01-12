@@ -26,6 +26,7 @@ export type RootStackParamList = {
   RegisterScreen: undefined;
   NewProgrammeScreen: undefined;
   Goals: { id: number };
+  CharacterScreen: undefined;
 };
 
-export const API_URL = 'https://89e636ddd662.ngrok-free.app'; 
+export const API_URL = 'https://5c0f54d3f25b.ngrok-free.app'; 

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../types';
-import { useAuth, AuthProvider} from '../context/AuthContext'; // Assurez-vous que le chemin est correct
+import { useAuth, AuthProvider } from '../context/AuthContext'; // Assurez-vous que le chemin est correct
 
 // Définir le type de navigation basé sur RootStackParamList
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -27,39 +27,47 @@ export default function Navbar() {
 
   return (
     <View style={tw`flex-row justify-around items-center bg-white border-t border-gray-200 px-4 py-3`}>
-      <TouchableOpacity 
-        style={tw`items-center`} 
+      <TouchableOpacity
+        style={tw`items-center`}
         onPress={() => navigation.navigate('DashboardScreen')}
       >
         <Ionicons name="calendar-outline" size={24} color="#888" />
         <Text style={tw`text-xs text-gray-500 mt-1`}>Aujourd'hui</Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={tw`items-center`} 
+
+      <TouchableOpacity
+        style={tw`items-center`}
         onPress={() => navigation.navigate('LevelScreen', { name: 'default' })}
       >
         <Ionicons name="flame-outline" size={24} color="#888" />
         <Text style={tw`text-xs text-gray-500 mt-1`}>Niveaux</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity style={tw`items-center`}>
         <Ionicons name="restaurant-outline" size={24} color="#888" />
         <Text style={tw`text-xs text-gray-500 mt-1`}>Repas</Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={tw`items-center`} 
+
+      <TouchableOpacity
+        style={tw`items-center`}
         onPress={handleProfilePress}
       >
-        <Ionicons 
-          name={token ? "person-outline" : "log-in-outline"} 
-          size={24} 
-          color="#888" 
+        <Ionicons
+          name={token ? "person-outline" : "log-in-outline"}
+          size={24}
+          color="#888"
         />
         <Text style={tw`text-xs text-gray-500 mt-1`}>
           {token ? "Profil" : "Connexion"}
         </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={tw`items-center`}
+        onPress={() => navigation.navigate('CharacterScreen')}
+      >
+        <Ionicons name="person-outline" size={24} color="#888" />
+        <Text style={tw`text-xs text-gray-500 mt-1`}>Personnage</Text>
       </TouchableOpacity>
     </View>
   );
