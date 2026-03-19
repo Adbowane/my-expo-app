@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
 import tw from 'twrnc';
-import { API_URL } from '../types';
 import axios from 'axios';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
-type ExerciseDetailsNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ExerciseDetails'>;
-
-interface Exercise {
-  Exercise_Id: number;
-  Program_Id: number;
-  Exercise_Name: string;
-  Image: string;
-  Time: string; // Time as a string in HH:MM:SS format
-  Program_Name?: string; // Added for program name
-}
+import { API_URL } from '../types';
+import { ExerciseAvatar } from '../components/ExerciseAvatar';
+import { getAnimationKey } from '../data/exerciseAnimations';
+import { ExerciseDetailsNavigationProp, Exercise } from '../types/ExerciseDetails.types';
+import { styles } from '../styles/ExerciseDetails.styles';
 
 // Utility function to convert HH:MM:SS to seconds
 const timeStringToSeconds = (timeString: string): number => {
@@ -29,10 +30,14 @@ const ExerciseDetails = () => {
   const navigation = useNavigation<ExerciseDetailsNavigationProp>();
   const route = useRoute();
   // Mise à jour de la récupération des paramètres
-  const { id, programId, exercises = [] } = route.params as { 
-    id: number, 
-    programId: number,
-    exercises: number[] 
+  const {
+    exerciseId,
+    programId,
+    exercises = [],
+  } = route.params as {
+    exerciseId: number;
+    programId: number;
+    exercises: number[];
   };
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
@@ -43,64 +48,118 @@ const ExerciseDetails = () => {
   const [initialTime, setInitialTime] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
-  const [programName, setProgramName] = useState<string>("");
+  const [programName, setProgramName] = useState<string>('');
 
   useEffect(() => {
     const fetchExerciseAndProgram = async () => {
       try {
         setError(null);
         setLoading(true);
-        
-        // Récupérer l'exercice actuel
-        const exerciseResponse = await axios.get(`${API_URL}/api/exercises/${id}`);
-        const fetchedExercise = exerciseResponse.data;
-        
+
+        // --- GESTION DES EXERCICES MOCKES (Venant de AnimeDetailsScreen) ---
+        if (exerciseId > 100) {
+          console.log("Mocked Exercise Detected:", exerciseId);
+
+          // Mock de données pour l'exercice
+          const fetchedExercise: Exercise = {
+            Exercise_Id: exerciseId,
+            Program_Id: programId || 999,
+            Exercise_Name: 'Entraînement Anime',
+            Image: 'https://via.placeholder.com/400x400/1F2937/FFFFFF?text=Anime+Workout',
+            Time: '00:01:00', // 1 minute par défaut
+            Program_Name: 'Séance Anime'
+          };
+
+          // Noms plus cohérents selon l'ID
+          if (exerciseId === 101) fetchedExercise.Exercise_Name = 'Échauffement Ninja';
+          if (exerciseId === 102) fetchedExercise.Exercise_Name = 'Pompes Explosives';
+          if (exerciseId === 103) fetchedExercise.Exercise_Name = 'Squat Sprint';
+          if (exerciseId === 104) fetchedExercise.Exercise_Name = 'Récupération';
+
+          setProgramName('Séance Anime');
+          setExercise(fetchedExercise);
+          setTimeLeft(timeStringToSeconds(fetchedExercise.Time));
+          setInitialTime(timeStringToSeconds(fetchedExercise.Time));
+
+          // Si on nous a passé une liste d'ID mockés dans route.params
+          if (exercises && exercises.length > 0) {
+            const mockList = exercises.map((id, index) => ({
+              Exercise_Id: id,
+              Program_Id: programId || 999,
+              Exercise_Name: `Mock ${id}`,
+              Image: '',
+              Time: '00:01:00',
+            }));
+            setProgramExercises(mockList);
+            const index = exercises.indexOf(exerciseId);
+            setCurrentExerciseIndex(index !== -1 ? index : 0);
+          }
+          setLoading(false);
+          return; // On arrête là pour les mocks !!
+        }
+        // ------------------------------------------------------------------
+
+        // Récupérer l'exercice actuel (Base de données normale)
+        const exerciseResponse = await axios.get(`${API_URL}/api/exercises/${exerciseId}`);
+        const rawExercise = exerciseResponse.data;
+        const fetchedExercise: Exercise = {
+          Exercise_Id: rawExercise.Exercise_Id || rawExercise.id || exerciseId,
+          Program_Id: rawExercise.Program_Id || rawExercise.programId || programId,
+          Exercise_Name: rawExercise.Exercise_Name || rawExercise.name || 'Exercice',
+          Image: rawExercise.Image || rawExercise.image || '',
+          Time: rawExercise.Time || rawExercise.time || '00:00:00',
+        };
+
         // Récupérer le nom du programme
         const programResponse = await axios.get(`${API_URL}/api/programs/${programId}`);
-        setProgramName(programResponse.data.Program_Name);
-        fetchedExercise.Program_Name = programResponse.data.Program_Name;
-        
+        const program_Name =
+          programResponse.data.Program_Name || programResponse.data.name || 'Programme';
+        setProgramName(program_Name);
+        fetchedExercise.Program_Name = program_Name;
+
         setExercise(fetchedExercise);
-        
+
         // Initialiser le timer
         const seconds = timeStringToSeconds(fetchedExercise.Time);
         setTimeLeft(seconds);
         setInitialTime(seconds);
-        
+
         // Récupérer tous les exercices du programme pour la navigation
         if (exercises.length === 0) {
-          const programExercisesResponse = await axios.get(`${API_URL}/api/exercises/program/${programId}`);
+          const programExercisesResponse = await axios.get(
+            `${API_URL}/api/exercises/program/${programId}`
+          );
           setProgramExercises(programExercisesResponse.data);
-          
+
           // Trouver l'index de l'exercice actuel
           const index = programExercisesResponse.data.findIndex(
-            (ex: Exercise) => ex.Exercise_Id === id
+            (ex: Exercise) => ex.Exercise_Id === exerciseId
           );
           setCurrentExerciseIndex(index !== -1 ? index : 0);
         } else {
           // Si nous avons déjà les IDs des exercices, récupérer leurs détails
           const fetchedExercises = await Promise.all(
-            exercises.map((id: number) => 
-              axios.get(`${API_URL}/api/exercises/${id}`).then(res => res.data)
+            exercises.map((id: number) =>
+              axios.get(`${API_URL}/api/exercises/${id}`).then((res) => res.data)
             )
           );
           setProgramExercises(fetchedExercises);
-          
+
           // Trouver l'index de l'exercice actuel
-          const index = exercises.findIndex((exerciseId: number) => exerciseId === id);
+          const index = exercises.findIndex((exId: number) => exId === exerciseId);
           setCurrentExerciseIndex(index !== -1 ? index : 0);
         }
       } catch (err) {
-        console.error('Erreur lors de la récupération de l\'exercice:', err);
-        setError('Impossible de récupérer l\'exercice.');
-        Alert.alert('Erreur', 'Impossible de récupérer l\'exercice.');
+        console.error("Erreur lors de la récupération de l'exercice:", err);
+        setError("Impossible de récupérer l'exercice.");
+        // Gérer visuellement plutôt qu'avec une Alert bloquante si possible
       } finally {
         setLoading(false);
       }
     };
 
     fetchExerciseAndProgram();
-  }, [id, programId, exercises]);
+  }, [exerciseId, programId, exercises]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -144,12 +203,13 @@ const ExerciseDetails = () => {
     if (programExercises.length > 0) {
       const nextIndex = (currentExerciseIndex + 1) % programExercises.length;
       const nextExercise = programExercises[nextIndex];
-      
+
       if (nextExercise) {
         navigation.replace('ExerciseDetails', {
-          id: nextExercise.Exercise_Id,
+          exerciseId: nextExercise.Exercise_Id,
           programId: programId,
-          exercises: exercises.length > 0 ? exercises : programExercises.map(ex => ex.Exercise_Id)
+          exercises:
+            exercises.length > 0 ? exercises : programExercises.map((ex) => ex.Exercise_Id),
         });
       }
     }
@@ -159,14 +219,14 @@ const ExerciseDetails = () => {
   const getNextExerciseName = (): string => {
     if (programExercises.length > 0) {
       const nextIndex = (currentExerciseIndex + 1) % programExercises.length;
-      return programExercises[nextIndex]?.Exercise_Name || "Fin du programme";
+      return programExercises[nextIndex]?.Exercise_Name || 'Fin du programme';
     }
-    return "Chargement...";
+    return 'Chargement...';
   };
 
   if (loading) {
     return (
-      <View style={tw`flex-1 bg-white justify-center items-center`}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" color="#48B0F1" />
       </View>
     );
@@ -174,18 +234,18 @@ const ExerciseDetails = () => {
 
   if (error || !exercise) {
     return (
-      <View style={tw`flex-1 bg-white justify-center items-center`}>
-        <Text style={tw`text-red-500 text-center text-lg`}>{error || 'Exercice non trouvé.'}</Text>
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error || 'Exercice non trouvé.'}</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
+    <SafeAreaView style={styles.root}>
       <StatusBar barStyle="dark-content" />
-      
+
       {/* Header */}
-      <View style={tw`flex-row items-center justify-between px-4 pt-2`}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
@@ -193,40 +253,40 @@ const ExerciseDetails = () => {
           <Ionicons name="settings-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
-      
+
       {/* Program and Exercise Name */}
-      <View style={tw`px-6 py-3`}>
-        <Text style={tw`text-gray-500 text-center text-sm font-medium`}>{exercise.Program_Name}</Text>
-        <Text style={tw`text-black text-center text-xl font-semibold mt-1`}>{exercise.Exercise_Name}</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.programName}>
+          {exercise.Program_Name}
+        </Text>
+        <Text style={styles.exerciseName}>
+          {exercise.Exercise_Name}
+        </Text>
       </View>
-      
+
       {/* Timer Container */}
-      <View style={tw`mx-6 bg-gray-100 rounded-2xl overflow-hidden`}>
-        <View style={tw`flex-row items-center justify-between p-4`}>
+      <View style={styles.timerContainer}>
+        <View style={styles.timerRow}>
           <View>
-            <Text style={tw`text-gray-500 text-xs font-medium`}>Timer</Text>
-            <Text style={[tw`text-3xl font-bold`, {color: '#000'}]}>
-              {formatTime(timeLeft)}
-            </Text>
-            <TouchableOpacity 
-              style={tw`bg-gray-800 rounded-lg px-4 py-1 mt-1`}
+            <Text style={styles.timerLabel}>Timer</Text>
+            <Text style={styles.timerValue}>{formatTime(timeLeft)}</Text>
+            <TouchableOpacity
+              style={styles.stopBtn}
               onPress={() => {
                 setIsTimerRunning(false);
                 setTimeLeft(initialTime);
-              }}
-            >
-              <Text style={tw`text-white text-xs font-medium text-center`}>Stop</Text>
+              }}>
+              <Text style={styles.stopBtnText}>Stop</Text>
             </TouchableOpacity>
           </View>
-          
+
           {/* Circular Timer */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              tw`w-20 h-20 rounded-full justify-center items-center`,
-              { backgroundColor: '#9188F1' }
+              styles.playBtnCircle,
+              { backgroundColor: '#9188F1' },
             ]}
-            onPress={isTimerRunning ? stopTimer : startTimer}
-          >
+            onPress={isTimerRunning ? stopTimer : startTimer}>
             <View style={tw`items-center justify-center`}>
               {isTimerRunning ? (
                 <Ionicons name="pause" size={32} color="white" />
@@ -237,26 +297,26 @@ const ExerciseDetails = () => {
           </TouchableOpacity>
         </View>
       </View>
-      
-      {/* Exercise Image */}
-      <View style={tw`flex-1 justify-center items-center px-6 py-4`}>
-        <Image 
-          source={{ uri: exercise.Image }} 
-          style={tw`w-4/5 h-64`} 
-          resizeMode="contain" 
-        />
+
+      {/* Exercise Avatar or Image */}
+      <View style={styles.avatarContainer}>
+        {getAnimationKey(exercise.Exercise_Name) ? (
+          <ExerciseAvatar
+            animationName={getAnimationKey(exercise.Exercise_Name)}
+            isPlaying={isTimerRunning}
+          />
+        ) : (
+          <Image source={{ uri: exercise.Image }} style={styles.avatarImage} resizeMode="contain" />
+        )}
       </View>
-      
+
       {/* Next Exercise */}
-      <View style={tw`px-6 pb-8`}>
-        <TouchableOpacity 
-          style={tw`flex-row items-center`}
-          onPress={goToNextExercise}
-        >
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.nextExerciseRow} onPress={goToNextExercise}>
           <MaterialIcons name="format-list-bulleted" size={24} color="gray" />
-          <View style={tw`ml-2`}>
-            <Text style={tw`text-gray-400 text-xs`}>Prochain exercice:</Text>
-            <Text style={tw`text-gray-600 text-sm`}>{getNextExerciseName()}</Text>
+          <View style={styles.nextExerciseInfo}>
+            <Text style={styles.nextExerciseLabel}>Prochain exercice:</Text>
+            <Text style={styles.nextExerciseName}>{getNextExerciseName()}</Text>
           </View>
         </TouchableOpacity>
       </View>

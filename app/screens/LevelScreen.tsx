@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { API_URL, RootStackParamList } from '../types';
+import { API_URL } from '../types';
 import tw from 'twrnc';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
@@ -10,18 +9,7 @@ import Navbar from '../components/Navbar';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 
-// Type de navigation pour l'écran de niveaux
-type LevelScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LevelScreen'>;
-
-// Interface pour le type Level
-interface Level {
-  Level_Id: number;
-  Level_Name: string;
-  Image?: string;
-  isCompleted?: boolean;
-  isProcessing?: boolean;
-  isLocked?: boolean;
-}
+import { LevelScreenNavigationProp, Level } from '../types/LevelScreen.types';
 
 const LevelScreen = () => {
   const navigation = useNavigation<LevelScreenNavigationProp>();
@@ -50,23 +38,23 @@ const LevelScreen = () => {
             // Si LevelScreen est dans un navigator imbriqué, essayer le parent
             const parentNav = (navigation as any).getParent?.();
             if (parentNav && typeof parentNav.navigate === 'function') {
-              // Naviguer via le parent navigator (route 'Login' doit exister au niveau racine)
-              parentNav.navigate('Login' as never);
+              // Naviguer via le parent navigator (route 'LoginRegisterScreen' doit exister au niveau racine)
+              parentNav.navigate('LoginRegisterScreen' as never);
               return;
             }
-            // Fallback : réinitialiser la stack de navigation pour aller vers Login
+            // Fallback : réinitialiser la stack de navigation pour aller vers LoginRegisterScreen
             if (typeof (navigation as any).reset === 'function') {
               (navigation as any).reset({
                 index: 0,
-                routes: [{ name: 'Login' as never }],
+                routes: [{ name: 'LoginRegisterScreen' as never }],
               });
               return;
             }
             // Last resort: essayer la navigation locale (peut échouer si route inexistante dans ce navigator)
             try {
-              navigation.navigate('Login' as never);
+              navigation.navigate('LoginRegisterScreen' as never);
             } catch (e) {
-              console.warn('Unable to navigate to Login from LevelScreen:', e);
+              console.warn('Unable to navigate to LoginRegisterScreen from LevelScreen:', e);
             }
           },
         },
@@ -89,9 +77,9 @@ const LevelScreen = () => {
         // Enrichir les niveaux avec l'état basé sur le niveau de l'utilisateur
         const enhancedLevels = levelsResponse.data.map((level: Level) => ({
           ...level,
-          isCompleted: level.Level_Id < currentLevel,
-          isProcessing: level.Level_Id === currentLevel,
-          isLocked: level.Level_Id > currentLevel,
+          isCompleted: level.id < currentLevel,
+          isProcessing: level.id === currentLevel,
+          isLocked: level.id > currentLevel,
         }));
         setLevels(enhancedLevels);
       } catch (err) {
@@ -111,12 +99,12 @@ const LevelScreen = () => {
     const isFirst = index === 0;
 
     return (
-      <View key={level.Level_Id} style={tw`mb-4`}>
+      <View key={level.id} style={tw`mb-4`}>
         {isFirst && (
           <View style={tw`mb-4`}>
             <TouchableOpacity
               style={tw`bg-blue-400 rounded-xl p-4 flex-row items-center justify-between`}
-              onPress={() => navigation.navigate('Goals', { id: 0 })}
+              onPress={() => navigation.navigate('Goals', { levelId: 0 })}
             >
               <View style={tw`flex-row items-center`}>
                 <Feather name="clipboard" size={24} color="white" style={tw`mr-3`} />
@@ -132,21 +120,21 @@ const LevelScreen = () => {
 
         <TouchableOpacity
           style={tw`bg-white rounded-xl p-4 ${level.isLocked ? 'opacity-50' : ''}`}
-          onPress={() => !level.isLocked && navigation.navigate('Goals', { id: level.Level_Id })}
+          onPress={() => !level.isLocked && navigation.navigate('Goals', { levelId: level.id })}
           disabled={level.isLocked}
         >
           <View style={tw`flex-row justify-between items-center`}>
             <View style={tw`flex-row items-center`}>
               <View style={tw`w-16 h-16 mr-4 justify-center items-center`}>
                 <Image
-                  source={level.Image ? { uri: level.Image } : require('../../assets/musclay.png')}
+                  source={level.image ? { uri: level.image } : require('../../assets/musclay.png')}
                   style={tw`w-16 h-16 rounded-xl shadow-lg`}
                   resizeMode="cover"
                 />
                 <View style={tw`absolute -bottom-1 w-12 h-1 bg-gray-200 rounded-full opacity-70`}></View>
               </View>
               <View>
-                <Text style={tw`font-bold text-lg text-gray-800`}>{level.Level_Name}</Text>
+                <Text style={tw`font-bold text-lg text-gray-800`}>{level.name}</Text>
                 {level.isCompleted && (
                   <Text style={tw`text-gray-500 text-xs`}>Niveau complété</Text>
                 )}

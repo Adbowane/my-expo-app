@@ -1,0 +1,19 @@
+﻿Air-squat.tsx(36,12): error TS2322: Type 'MutableRefObject<Group<Object3DEventMap> | undefined>' is not assignable to type 'Ref<Group<Object3DEventMap>> | undefined'.
+  Type 'MutableRefObject<Group<Object3DEventMap> | undefined>' is not assignable to type 'RefObject<Group<Object3DEventMap>>'.
+    Types of property 'current' are incompatible.
+      Type 'Group<Object3DEventMap> | undefined' is not assignable to type 'Group<Object3DEventMap> | null'.
+        Type 'undefined' is not assignable to type 'Group<Object3DEventMap> | null'.
+app/screens/AnimeDetailsScreen.tsx(21,60): error TS2307: Cannot find module '../types/AnimeDetailsScreen.types' or its corresponding type declarations.
+app/screens/AnimeDetailsScreen.tsx(22,34): error TS2307: Cannot find module '../styles/AnimeDetailsScreen.styles' or its corresponding type declarations.
+app/screens/AnimeDiscoverScreen.tsx(22,32): error TS2307: Cannot find module '../types/AnimeDiscoverScreen.types' or its corresponding type declarations.
+app/screens/AnimeSearchScreen.tsx(22,49): error TS2307: Cannot find module '../types/AnimeSearchScreen.types' or its corresponding type declarations.
+app/screens/CharacterScreen.tsx(20,21): error TS2307: Cannot find module '../types/CharacterScreen.types' or its corresponding type declarations.
+app/screens/DashboardScreen.tsx(24,32): error TS2307: Cannot find module '../types/DashboardScreen.types' or its corresponding type declarations.
+app/screens/DashboardScreen.tsx(25,36): error TS2307: Cannot find module '../styles/DashboardScreen.styles' or its corresponding type declarations.
+app/screens/ExerciseDetails.tsx(20,57): error TS2307: Cannot find module '../types/ExerciseDetails.types' or its corresponding type declarations.
+app/screens/Exercises.tsx(10,65): error TS2307: Cannot find module '../types/Exercises.types' or its corresponding type declarations.
+app/screens/Goals.tsx(22,49): error TS2307: Cannot find module '../types/Goals.types' or its corresponding type declarations.
+app/screens/Home.tsx(4,42): error TS2307: Cannot find module '../types/Home.types' or its corresponding type declarations.
+app/screens/IndexScreen.tsx(6,42): error TS2307: Cannot find module '../types/IndexScreen.types' or its corresponding type declarations.
+app/screens/LevelScreen.tsx(12,50): error TS2307: Cannot find module '../types/LevelScreen.types' or its corresponding type declarations.
+app/screens/ProgrammesScreen.tsx(10,70): error TS2307: Cannot find module '../types/ProgrammesScreen.types' or its corresponding type declarations.

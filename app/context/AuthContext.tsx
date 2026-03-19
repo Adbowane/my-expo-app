@@ -18,7 +18,15 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, surname: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name: string,
+    surname: string,
+    age?: string,
+    fitnessLevel?: string | null,
+    favoriteAnime?: string | null
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -100,13 +108,24 @@ const login = async (email: string, password: string) => {
 };
 
   // Fonction d'inscription
-  const register = async (email: string, password: string, name: string, surname: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+    surname: string,
+    age?: string,
+    fitnessLevel?: string | null,
+    favoriteAnime?: string | null
+  ) => {
     try {
       const response = await axios.post(`${API_URL}/api/register`, {
         email,
         password,
         name,
         surname,
+        age: age ? parseInt(age, 10) : undefined,
+        fitnessLevel: fitnessLevel || undefined,
+        favoriteAnime: favoriteAnime || undefined,
       });
 
       // Après l'inscription, connecter automatiquement l'utilisateur

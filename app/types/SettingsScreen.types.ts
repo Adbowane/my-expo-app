@@ -1,0 +1,42 @@
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types';
+
+export type SettingsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SettingsScreen'>;
+
+export type UserSettings = {
+  settingsId?: number;
+  userId?: number;
+  language: string;
+  theme: string;
+  measurementUnit: string;
+  timezone: string;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  workoutReminders: boolean;
+  reminderTime: string;
+  challengeNotifications: boolean;
+  goalNotifications: boolean;
+  achievementNotifications: boolean;
+  newsletterSubscription: boolean;
+  marketingEmails: boolean;
+  profileVisibility: string;
+  showWeight: boolean;
+  showProgress: boolean;
+  showStats: boolean;
+  showLevel: boolean;
+  shareProgressWithFriends: boolean;
+  allowDataAnalytics: boolean;
+  weeklyWorkoutGoal: number;
+  preferredWorkoutDays: boolean[];
+  preferredWorkoutTime: string;
+  autoStartNextExercise: boolean;
+  showRestTimer: boolean;
+  restTimerDuration: number;
+  soundEffects: boolean;
+  musicEnabled: boolean;
+  hapticFeedback: boolean;
+  showMotivationalQuotes: boolean;
+  twoFactorEnabled: boolean;
+  sessionTimeout: number;
+  lastPasswordChange?: string;
+};

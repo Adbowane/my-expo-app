@@ -38,7 +38,7 @@ const LoginForm = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Connexion</Text>
-      
+
       <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
@@ -48,7 +48,7 @@ const LoginForm = () => {
         keyboardType="email-address"
         placeholder="exemple@email.com"
       />
-      
+
       <Text style={styles.label}>Mot de passe</Text>
       <TextInput
         style={styles.input}
@@ -57,7 +57,7 @@ const LoginForm = () => {
         secureTextEntry
         placeholder="Votre mot de passe"
       />
-      
+
       {isLoading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
@@ -67,12 +67,10 @@ const LoginForm = () => {
   );
 };
 
-// Composant principal qui enveloppe le formulaire avec le AuthProvider
+// Composant principal
 const LoginScreen = () => {
   return (
-    <AuthProvider>
-      <LoginForm />
-    </AuthProvider>
+    <LoginForm />
   );
 };
 
@@ -92,9 +90,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
-  input: { 
-    height: 50, 
-    borderColor: 'gray', 
+  input: {
+    height: 50,
+    borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 20,

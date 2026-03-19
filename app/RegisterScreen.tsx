@@ -27,7 +27,7 @@ const RegisterForm = () => {
     setIsLoading(true);
     try {
       await register(email, password, name, surname);
-      
+
       // Afficher une pop-up de succès
       Alert.alert(
         'Succès',
@@ -37,7 +37,7 @@ const RegisterForm = () => {
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert('Échec de l\'inscription', error.message);
-        
+
       } else {
         Alert.alert('Échec de l\'inscription', 'Une erreur inconnue est survenue.');
       }
@@ -49,23 +49,23 @@ const RegisterForm = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Inscription</Text>
-      
+
       <Text style={styles.label}>Prénom</Text>
-      <TextInput 
-        style={styles.input} 
-        value={name} 
-        onChangeText={setName} 
+      <TextInput
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
         placeholder="Entrez votre prénom"
       />
-      
+
       <Text style={styles.label}>Nom</Text>
-      <TextInput 
-        style={styles.input} 
-        value={surname} 
-        onChangeText={setSurname} 
+      <TextInput
+        style={styles.input}
+        value={surname}
+        onChangeText={setSurname}
         placeholder="Entrez votre nom"
       />
-      
+
       <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
@@ -75,7 +75,7 @@ const RegisterForm = () => {
         keyboardType="email-address"
         placeholder="exemple@email.com"
       />
-      
+
       <Text style={styles.label}>Mot de passe</Text>
       <TextInput
         style={styles.input}
@@ -93,7 +93,7 @@ const RegisterForm = () => {
         secureTextEntry
         placeholder="Confirmez votre mot de passe"
       />
-      
+
       {isLoading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
@@ -106,9 +106,7 @@ const RegisterForm = () => {
 // Composant principal qui enveloppe le formulaire avec l'AuthProvider
 const RegisterScreen = () => {
   return (
-    <AuthProvider>
-      <RegisterForm />
-    </AuthProvider>
+    <RegisterForm />
   );
 };
 
@@ -128,9 +126,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
   },
-  input: { 
-    height: 50, 
-    borderColor: 'gray', 
+  input: {
+    height: 50,
+    borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 20,

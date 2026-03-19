@@ -2,10 +2,8 @@ import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
 import tw from 'twrnc';
-
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+import { HomeScreenNavigationProp } from '../types/IndexScreen.types';
 
 export default function IndexScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();

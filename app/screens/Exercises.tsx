@@ -1,38 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, SafeAreaView, StatusBar } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types';
 import Navbar from '../components/Navbar';
 import tw from 'twrnc';
-import { API_URL } from '../types';
 import axios from 'axios';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-// Type de navigation pour l'écran des exercices
-type ExerciseScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Exercises'>;
-
-// Interface pour les programmes d'entraînement
-interface Program {
-  Program_Id: number;
-  Program_Name: string;
-  Goal_Id: number;
-}
-
-// Interface pour les exercices individuels
-interface Exercise {
-  Exercise_Id: number;
-  Program_Id: number;
-  Exercise_Name: string;
-  Image: string;
-  Time: string;
-}
+import { API_URL } from '../types';
+import { ExerciseScreenNavigationProp, Program, Exercise } from '../types/Exercises.types';
 
 const Exercises = () => {
   const navigation = useNavigation<ExerciseScreenNavigationProp>();
   const route = useRoute();
   const { programId } = route.params as { programId: number };
-  
+
   // États pour gérer les données
   const [program, setProgram] = useState<Program | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -44,15 +25,28 @@ const Exercises = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Récupérer les détails du programme
       const programResponse = await axios.get(`${API_URL}/api/programs/${programId}`);
-      setProgram(programResponse.data);
-      
+      const rawProgram = programResponse.data;
+      const mappedProgram: Program = {
+        Program_Id: rawProgram.Program_Id || rawProgram.id || programId,
+        Program_Name: rawProgram.Program_Name || rawProgram.name || 'Programme',
+        Goal_Id: rawProgram.Goal_Id || rawProgram.goalId || 0
+      };
+      setProgram(mappedProgram);
+
       // Récupérer les exercices du programme
       const exercisesResponse = await axios.get(`${API_URL}/api/exercises/program/${programId}`);
-      setExercises(exercisesResponse.data);
-      
+      const mappedExercises = exercisesResponse.data.map((item: any) => ({
+        Exercise_Id: item.Exercise_Id || item.id || item.exerciseId,
+        Program_Id: item.Program_Id || item.programId || programId,
+        Exercise_Name: item.Exercise_Name || item.name || item.title || 'Exercice',
+        Image: item.Image || item.image || '',
+        Time: item.Time || item.time || '00:00:00'
+      }));
+      setExercises(mappedExercises);
+
       setLoading(false);
     } catch (err) {
       console.error('Erreur lors de la récupération des données:', err);
@@ -68,8 +62,8 @@ const Exercises = () => {
 
   // Naviguer vers les détails d'un exercice
   const handleExerciseSelect = (exerciseId: number) => {
-    navigation.navigate('ExerciseDetails', { 
-      id: exerciseId,
+    navigation.navigate('ExerciseDetails', {
+      exerciseId: exerciseId,
       programId: programId,
       exercises: exercises.map(ex => ex.Exercise_Id)
     });
@@ -78,8 +72,8 @@ const Exercises = () => {
   // Commencer l'entraînement avec le premier exercice du programme
   const handleStartWorkout = () => {
     if (exercises.length > 0) {
-      navigation.navigate('ExerciseDetails', { 
-        id: exercises[0].Exercise_Id,
+      navigation.navigate('ExerciseDetails', {
+        exerciseId: exercises[0].Exercise_Id,
         programId: programId,
         exercises: exercises.map(ex => ex.Exercise_Id)
       });
@@ -102,7 +96,7 @@ const Exercises = () => {
       <SafeAreaView style={tw`flex-1 justify-center items-center bg-white`}>
         <Ionicons name="warning-outline" size={48} color="#ff4444" />
         <Text style={tw`mt-4 text-lg text-gray-700 text-center px-8`}>{error}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={tw`mt-6 bg-violet-600 px-6 py-3 rounded-full`}
           onPress={() => {
             setError(null);
@@ -120,7 +114,7 @@ const Exercises = () => {
   return (
     <SafeAreaView style={tw`flex-1 bg-white`}>
       <StatusBar barStyle="dark-content" />
-      
+
       {/* En-tête avec image */}
       <View style={tw`relative`}>
         {exercises.length > 0 && (
@@ -131,8 +125,8 @@ const Exercises = () => {
           />
         )}
         <View style={tw`absolute top-0 left-0 right-0 p-4 flex-row justify-between items-center`}>
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()} 
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
             style={tw`bg-white bg-opacity-20 rounded-full p-2`}
           >
             <Feather name="arrow-left" size={24} color="white" />

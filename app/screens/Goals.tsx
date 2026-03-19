@@ -1,82 +1,38 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { API_URL } from '../types';
 
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
   ActivityIndicator,
   Image,
-  Dimensions,
   StatusBar,
   Animated,
   ScrollView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import tw from 'twrnc';
 import axios from 'axios';
-import Navbar from 'app/components/Navbar';
+import Navbar from '../components/Navbar';
 
-// Définition du type pour les paramètres de route
-// type RouteParams = {
-//   levelId?: number;
-//   goalId?: number;
-// };
-
-// Définition correcte du type de navigation
-type RootStackParamList = {
-  Goals: undefined;
-  Programmes: { goalId: number };
-  LevelScreen: { programId: number };
-  Home: undefined;
-  Profile: undefined;
-  Calendar: undefined;
-  Today: undefined;
-  Workouts: undefined;
-};
-
-type GoalsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Goals'>;
-
-type Goal = {
-  Goal_Id: number;
-  Level_Id: number;
-  Goal_Name: string;
-  Description: string;
-  Image: string;
-  ImageGoal: string | null;
-  Duration: string;
-  Improvement: string;
-  Followers: number;
-  Impact: string;
-  Streak: string;
-
-};
-
-// Images de secours par catégorie
-export const fallbackImages = {
-  'Perte de poids': 'https://tse4.mm.bing.net/th?id=OIG3.RAolgCJjIH4B4ovrt1tf&pid=ImgGn',
-  'Gain musculaire': 'https://tse4.mm.bing.net/th?id=OIG3.RAolgCJjIH4B4ovrt1tf&pid=ImgGn',
-  'Maintien de forme': 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=1169&auto=format&fit=crop',
-  'Endurance cardio': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1170&auto=format&fit=crop',
-  'Force maximale': 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1170&auto=format&fit=crop',
-  'default': 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1170&auto=format&fit=crop'
-};
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const CARD_WIDTH = SCREEN_WIDTH * 0.8; // Augmenté pour avoir des cartes plus grandes
+import { GoalsScreenNavigationProp, Goal } from '../types/Goals.types';
+import { fallbackImages, CARD_WIDTH } from '../styles/Goals.styles';
 
 const Goals = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [imageErrors, setImageErrors] = useState<{[key: number]: boolean}>({});
-  
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+
   const navigation = useNavigation<GoalsScreenNavigationProp>();
+  const route = useRoute();
+  const { levelId: initialLevelId } = (route.params as { levelId?: number }) || {};
+
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
 
@@ -93,21 +49,45 @@ const Goals = () => {
     const fetchGoals = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/goals`);
-        
-        // Vérification des URLs des images
-        const processedGoals = response.data.map((goal: Goal) => {
-          console.log('Original Image URL:', goal.Image); // Log original image URL
-          // Utiliser l'image de la base de données par défaut
-          goal.ImageGoal = goal.Image || fallbackImages.default;
-          console.log('Processed Image URL:', goal.ImageGoal); // Log processed image URL
-          return goal;
+
+        // Vérification et mappage des données de l'API
+        const processedGoals = response.data.map((item: any) => {
+          // Mappage robuste pour gérer les variations de noms de champs de l'API
+          const mappedGoal: Goal = {
+            Goal_Id: item.Goal_Id || item.id || item.goalId,
+            Level_Id: item.Level_Id || item.levelId,
+            Goal_Name: item.Goal_Name || item.name || item.title || '',
+            Description: item.Description || item.description || '',
+            Image: item.Image || item.image || item.imageUrl || '',
+            ImageGoal: item.Image || item.image || item.imageUrl || fallbackImages.default,
+            Duration: item.Duration || item.duration || 'N/A',
+            Improvement: item.Improvement || item.improvement || 'N/A',
+            Followers: item.Followers || item.followers || 0,
+            Impact: item.Impact || item.impact || 'N/A',
+            Streak: item.Streak || item.streak || 'N/A',
+          };
+
+          console.log('Mapped Goal:', mappedGoal.Goal_Id, mappedGoal.Goal_Name);
+          return mappedGoal;
         });
-        
+
         setGoals(processedGoals);
-        
-        // Sélectionner le premier par défaut
+
+        // Sélectionner l'objectif correspondant au levelId ou le premier par défaut
         if (processedGoals.length > 0) {
-          setSelectedGoal(processedGoals[0].Goal_Id);
+          let targetIndex = 0;
+          if (initialLevelId) {
+            const foundIndex = processedGoals.findIndex((g: Goal) => g.Level_Id === initialLevelId);
+            if (foundIndex !== -1) targetIndex = foundIndex;
+          }
+
+          setSelectedGoal(processedGoals[targetIndex].Goal_Id);
+          setCurrentIndex(targetIndex);
+
+          // Petit délai pour laisser le temps à la liste de se charger avant de scroller
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({ index: targetIndex, animated: false });
+          }, 100);
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des objectifs:', error);
@@ -121,7 +101,7 @@ const Goals = () => {
 
   const handleImageError = (goalId: number) => {
     console.log('Image failed to load for goal ID:', goalId); // Log image load failure
-    setImageErrors(prev => ({...prev, [goalId]: true}));
+    setImageErrors(prev => ({ ...prev, [goalId]: true }));
   };
 
   const getImageSource = (item: Goal) => {
@@ -134,7 +114,7 @@ const Goals = () => {
   const handleSelectGoal = (goalId: number, index: number) => {
     setSelectedGoal(goalId);
     setCurrentIndex(index);
-    
+
     flatListRef.current?.scrollToIndex({
       index: index,
       animated: true
@@ -180,19 +160,19 @@ const Goals = () => {
             <Text style={tw`text-xs font-medium text-white`}>Fitness</Text>
           </View>
         </View>
-        
+
         {/* Main Title */}
         <View style={tw`px-5 mt-2`}>
           <Text style={tw`text-3xl font-extrabold tracking-tight`}>
             Choisissez votre objectif
           </Text>
-          
+
           {/* Progress Dots */}
           <View style={tw`flex-row my-3`}>
             {[0, 1, 2, 3, 4].map((dot, index) => (
-              <View 
-                key={index} 
-                style={tw`h-2 w-2 rounded-full mx-1 ${index <= 2 ? 'bg-black' : 'bg-gray-300'}`} 
+              <View
+                key={index}
+                style={tw`h-2 w-2 rounded-full mx-1 ${index <= 2 ? 'bg-black' : 'bg-gray-300'}`}
               />
             ))}
           </View>
@@ -213,10 +193,10 @@ const Goals = () => {
             { useNativeDriver: false }
           )}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
-          keyExtractor={(item) => item.Goal_Id.toString()}
+          keyExtractor={(item, index) => (item?.Goal_Id?.toString() || index.toString())}
           renderItem={({ item, index }) => {
             const isSelected = item.Goal_Id === selectedGoal;
-            
+
             return (
               <TouchableOpacity
                 activeOpacity={0.9}
@@ -231,13 +211,13 @@ const Goals = () => {
                   {/* Goal Image and Details with Gradient */}
                   <View style={tw`h-2/3 justify-center items-center bg-gray-100 relative`}>
                     {/* Image de l'objectif avec gestion des erreurs */}
-                    <Image 
+                    <Image
                       source={{ uri: getImageSource(item) as string | undefined }}
                       style={tw`absolute w-full h-full`}
                       resizeMode="cover"
                       onError={() => handleImageError(item.Goal_Id)}
                     />
-                    
+
                     {/* Gradient overlay pour meilleure visibilité du texte */}
                     <LinearGradient
                       colors={['transparent', 'rgba(102, 51, 153, 0.8)']}
@@ -245,23 +225,23 @@ const Goals = () => {
                       end={{ x: 1, y: 0 }}
                       style={tw`absolute w-full h-full`}
                     />
-                    
+
                     {/* Nom de l'objectif en grand à droite */}
                     <View style={tw`absolute right-4 top-8 w-40 items-end`}>
                       <Text style={tw`text-4xl font-black text-white text-right leading-tight`}>
-                        {item.Goal_Name.toUpperCase()}
+                        {(item.Goal_Name || '').toUpperCase()}
                       </Text>
                     </View>
-                    
+
                     {/* Icône pour l'objectif */}
                     <View style={tw`absolute bottom-4 left-4 bg-black/20 p-3 rounded-full`}>
-                      <MaterialCommunityIcons 
-                        name={getIconNameForGoal(item.Goal_Name) as any} 
-                        size={32} 
-                        color="#fff" 
+                      <MaterialCommunityIcons
+                        name={getIconNameForGoal(item.Goal_Name) as any}
+                        size={32}
+                        color="#fff"
                       />
                     </View>
-                    
+
                     {/* Statistiques */}
                     <View style={tw`absolute right-4 bottom-16`}>
                       <View style={tw`items-end mb-6`}>
@@ -273,29 +253,29 @@ const Goals = () => {
                           <MaterialCommunityIcons name="account-group" size={24} color="#fff" />
                         </View>
                       </View>
-                      
+
                       <View style={tw`items-end mb-6`}>
                         <Text style={tw`text-gray-200 text-xs mb-1`}>STREAK MOYEN</Text>
                         <Text style={tw`text-lg font-bold text-white`}>{item.Streak}</Text>
                       </View>
-                      
+
                       <View style={tw`items-end`}>
                         <Text style={tw`text-gray-200 text-xs mb-1`}>IMPACT MOYEN</Text>
                         <Text style={tw`text-lg font-bold text-white`}>{item.Impact}</Text>
                       </View>
                     </View>
                   </View>
-                  
+
                   {/* Détails en bas */}
                   <View style={tw`bg-white p-4 rounded-t-3xl -mt-6 flex-1`}>
                     <Text style={tw`text-gray-500 text-sm font-medium mb-1`}>Détails de l'intervention</Text>
-                    
+
                     {/* Navigation par onglets */}
                     <View style={tw`flex-row mb-4`}>
                       <Text style={tw`text-xl font-bold mr-4 uppercase`}>APERÇU</Text>
                       <Text style={tw`text-xl font-bold text-gray-300 uppercase`}>INFO SCIENTIFIQUE</Text>
                     </View>
-                    
+
                     <View style={tw`flex-row justify-between mb-2`}>
                       <View style={tw`flex-1 mr-2 bg-gray-100 p-3 rounded-lg`}>
                         <Text style={tw`text-xs text-gray-500`}>DURÉE RECOMMANDÉE</Text>
@@ -312,7 +292,7 @@ const Goals = () => {
             );
           }}
         />
-        
+
         {/* Bouton Suivant */}
         {selectedGoal && (
           <View style={tw`px-5 mb-24`}>
@@ -326,9 +306,9 @@ const Goals = () => {
         )}
       </ScrollView>
 
-     {/* Navbar */}
-     <Navbar />
-    
+      {/* Navbar */}
+      <Navbar />
+
     </View>
   );
 }
