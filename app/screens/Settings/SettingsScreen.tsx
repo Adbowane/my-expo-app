@@ -12,12 +12,12 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Navbar from '../components/Navbar';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import Navbar from '../../components/Navbar';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import tw from 'twrnc';
 
-import { SettingsScreenNavigationProp, UserSettings } from '../types/SettingsScreen.types';
+import { SettingsScreenNavigationProp, UserSettings } from '../../types/SettingsScreen.types';
 
 const defaultSettings: UserSettings = {
   language: 'en',

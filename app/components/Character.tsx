@@ -2,8 +2,8 @@ import React, { useRef, useEffect, useMemo } from 'react';
 import { useGLTF, useAnimations } from '@react-three/drei/native';
 import * as THREE from 'three';
 
-import { AvatarCustomizations, GLTFResult, CharacterProps } from './Character.types';
-export * from './Character.types';
+import { AvatarCustomizations, GLTFResult, CharacterProps } from '../types/Character.types';
+export * from '../types/Character.types';
 
 // ── Couleurs par défaut ───────────────────────────────────────────────────────
 

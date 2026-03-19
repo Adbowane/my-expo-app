@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { API_URL } from '../types';
+import { API_URL } from '../../types';
 import tw from 'twrnc';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
+import Navbar from '../../components/Navbar';
 import { Feather } from '@expo/vector-icons';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
-import { LevelScreenNavigationProp, Level } from '../types/LevelScreen.types';
+import { LevelScreenNavigationProp, Level } from '../../types/LevelScreen.types';
 
 const LevelScreen = () => {
   const navigation = useNavigation<LevelScreenNavigationProp>();

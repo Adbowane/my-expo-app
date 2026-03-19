@@ -14,11 +14,11 @@ import tw from 'twrnc';
 import axios from 'axios';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
-import { API_URL } from '../types';
-import { ExerciseAvatar } from '../components/ExerciseAvatar';
-import { getAnimationKey } from '../data/exerciseAnimations';
-import { ExerciseDetailsNavigationProp, Exercise } from '../types/ExerciseDetails.types';
-import { styles } from '../styles/ExerciseDetails.styles';
+import { API_URL } from '../../types';
+import { ExerciseAvatar } from '../../components/ExerciseAvatar';
+import { getAnimationKey } from '../../data/exerciseAnimations';
+import { ExerciseDetailsNavigationProp, Exercise } from '../../types/ExerciseDetails.types';
+import { styles } from '../../styles/ExerciseDetails.styles';
 
 // Utility function to convert HH:MM:SS to seconds
 const timeStringToSeconds = (timeString: string): number => {

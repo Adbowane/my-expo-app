@@ -15,12 +15,12 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { API_URL } from '../types';
-import { getAnimeMedia } from '../data/AnimeThemes';
+import { API_URL } from '../../types';
+import { getAnimeMedia } from '../../data/AnimeThemes';
 
 // Imports des types et styles
-import { Nav, SearchRouteProp, Challenge } from '../types/AnimeSearchScreen.types';
-import { styles } from '../styles/AnimeSearchScreen.styles';
+import { Nav, SearchRouteProp, Challenge } from '../../types/AnimeSearchScreen.types';
+import { styles } from '../../styles/AnimeSearchScreen.styles';
 
 const BG_COLOR = '#0f172a'; // Slate-900 
 const FILTERS = ['Tous', 'Force', 'Cardio', 'Agilité', 'Aura', 'Souplesse'];

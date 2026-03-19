@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, SafeAreaView, StatusBar } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import Navbar from '../components/Navbar';
+import Navbar from '../../components/Navbar';
 import tw from 'twrnc';
 import axios from 'axios';
 import { Feather, Ionicons } from '@expo/vector-icons';
 
-import { API_URL } from '../types';
-import { ExerciseScreenNavigationProp, Program, Exercise } from '../types/Exercises.types';
+import { API_URL } from '../../types';
+import { ExerciseScreenNavigationProp, Program, Exercise } from '../../types/Exercises.types';
 
 const Exercises = () => {
   const navigation = useNavigation<ExerciseScreenNavigationProp>();

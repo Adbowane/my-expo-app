@@ -14,13 +14,13 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { API_URL } from '../types';
-import Navbar from '../components/Navbar';
-import { getAnimeMedia } from '../data/AnimeThemes';
+import { API_URL } from '../../types';
+import Navbar from '../../components/Navbar';
+import { getAnimeMedia } from '../../data/AnimeThemes';
 
 // Imports types & styles
-import { Challenge, Nav } from '../types/AnimeDiscoverScreen.types';
-import { styles, BG_COLOR } from '../styles/AnimeDiscoverScreen.styles';
+import { Challenge, Nav } from '../../types/AnimeDiscoverScreen.types';
+import { styles, BG_COLOR } from '../../styles/AnimeDiscoverScreen.styles';
 
 export default function AnimeDiscoverScreen() {
   const navigation = useNavigation<Nav>();

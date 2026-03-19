@@ -4,8 +4,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 
-import { styles } from './Navbar.styles';
-import { NavigationProp, NavItem } from './Navbar.types';
+import { styles } from '../types/Navbar.styles';
+import { NavigationProp, NavItem } from '../types/Navbar.types';
 
 const NAV_ITEMS: NavItem[] = [
   {

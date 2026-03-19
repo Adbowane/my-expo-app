@@ -14,15 +14,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
-import { API_URL } from '../types';
-import { Character } from '../components/Character';
-import { useAvatar } from '../context/AvatarContext';
-import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
+import { API_URL } from '../../types';
+import { Character } from '../../components/Character';
+import { useAvatar } from '../../context/AvatarContext';
+import { useAuth } from '../../context/AuthContext';
+import Navbar from '../../components/Navbar';
 
 // Imports types & styles
-import { Nav, Challenge } from '../types/DashboardScreen.types';
-import { styles, BG, PURPLE } from '../styles/DashboardScreen.styles';
+import { Nav, Challenge } from '../../types/DashboardScreen.types';
+import { styles, BG, PURPLE } from '../../styles/DashboardScreen.styles';
 
 const DashboardScreen = () => {
   const navigation = useNavigation<Nav>();

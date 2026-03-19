@@ -13,11 +13,11 @@ import useControls from 'r3f-native-orbitcontrols';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-import { Character, AvatarCustomizations } from '../components/Character';
-import { useAvatar } from '../context/AvatarContext';
+import { Character, AvatarCustomizations } from '../../components/Character';
+import { useAvatar } from '../../context/AvatarContext';
 
 // Imports types & styles
-import { Nav } from '../types/CharacterScreen.types';
+import { Nav } from '../../types/CharacterScreen.types';
 import {
   styles,
   PURPLE,
@@ -26,7 +26,7 @@ import {
   OUTFIT_COLORS,
   SKIN_TONES,
   OUTFIT_TABS,
-} from '../styles/CharacterScreen.styles';
+} from '../../styles/CharacterScreen.styles';
 
 const CharacterScreen = () => {
   const navigation = useNavigation<Nav>();

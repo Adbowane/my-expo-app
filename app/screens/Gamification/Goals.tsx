@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { API_URL } from '../types';
+import { API_URL } from '../../types';
 
 import {
   View,
@@ -17,10 +17,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import tw from 'twrnc';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
+import Navbar from '../../components/Navbar';
 
-import { GoalsScreenNavigationProp, Goal } from '../types/Goals.types';
-import { fallbackImages, CARD_WIDTH } from '../styles/Goals.styles';
+import { GoalsScreenNavigationProp, Goal } from '../../types/Goals.types';
+import { fallbackImages, CARD_WIDTH } from '../../styles/Goals.styles';
 
 const Goals = () => {
   const [goals, setGoals] = useState<Goal[]>([]);

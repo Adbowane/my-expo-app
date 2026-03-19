@@ -4,11 +4,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
-import Navbar from '../components/Navbar';
-import { API_URL } from '../types';
+import Navbar from '../../components/Navbar';
+import { API_URL } from '../../types';
 
-import { RouteParams, ProgrammesScreenNavigationProp, Program } from '../types/ProgrammesScreen.types';
-import { styles, ITEM_WIDTH } from '../styles/ProgrammesScreen.styles';
+import { RouteParams, ProgrammesScreenNavigationProp, Program } from '../../types/ProgrammesScreen.types';
+import { styles, ITEM_WIDTH } from '../../styles/ProgrammesScreen.styles';
 
 // Suppression des doublons de constantes
 

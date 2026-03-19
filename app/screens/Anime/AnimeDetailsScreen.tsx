@@ -14,12 +14,12 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { API_URL } from '../types';
-import { getAnimeMedia } from '../data/AnimeThemes';
+import { API_URL } from '../../types';
+import { getAnimeMedia } from '../../data/AnimeThemes';
 
 // Imports types & styles
-import { Challenge, Exercise, Nav, DetailsRouteProp } from '../types/AnimeDetailsScreen.types';
-import { styles, BG_COLOR } from '../styles/AnimeDetailsScreen.styles';
+import { Challenge, Exercise, Nav, DetailsRouteProp } from '../../types/AnimeDetailsScreen.types';
+import { styles, BG_COLOR } from '../../styles/AnimeDetailsScreen.styles';
 
 export default function AnimeDetailsScreen() {
     const navigation = useNavigation<Nav>();
