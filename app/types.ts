@@ -46,4 +46,4 @@ export interface ProfileFormData {
   favoriteAnime: FavoriteAnime | null;
 }
 
-export const API_URL = 'https://6d9b-83-167-48-10.ngrok-free.app';
+export const API_URL = 'https://e347-194-11-197-236.ngrok-free.app';

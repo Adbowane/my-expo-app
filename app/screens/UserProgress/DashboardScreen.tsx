@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
-import { Canvas } from '@react-three/fiber/native';
+import { Canvas, useThree } from '@react-three/fiber/native';
 import useControls from 'r3f-native-orbitcontrols';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -24,6 +24,20 @@ import Navbar from '../../components/Navbar';
 import { Nav, Challenge } from '../../types/DashboardScreen.types';
 import { styles, BG, PURPLE } from '../../styles/DashboardScreen.styles';
 
+function CameraResetter({ trigger }: { trigger: number }) {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    if (trigger > 0) {
+      camera.position.set(0, 0, 2.6);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+    }
+  }, [trigger, camera]);
+
+  return null;
+}
+
 const DashboardScreen = () => {
   const navigation = useNavigation<Nav>();
   const [OrbitControls, events] = useControls();
@@ -33,6 +47,8 @@ const DashboardScreen = () => {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [challengeProgress] = useState(65);
   const [loadingChallenge, setLoadingChallenge] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
+  const [resetTrigger, setResetTrigger] = useState(0);
 
   // Streak simulé (à connecter à l'API progress)
   const dayStreak = 3;
@@ -146,9 +162,22 @@ const DashboardScreen = () => {
           </View>
 
           {/* Canvas Three.js */}
-          <View style={styles.canvasWrapper} {...events}>
+          <View
+            style={styles.canvasWrapper}
+            {...events}
+            onTouchEnd={() => {
+              const now = Date.now();
+              if (now - lastTap < 300) {
+                setResetTrigger((prev) => prev + 1);
+                setLastTap(0);
+              } else {
+                setLastTap(now);
+              }
+            }}
+          >
             <Canvas camera={{ position: [0, 0, 2.6], fov: 50 }}>
-              <OrbitControls enableZoom={false} />
+              <CameraResetter trigger={resetTrigger} />
+              <OrbitControls enableZoom={false} enablePan={false} />
               <ambientLight intensity={1.5} />
               <directionalLight position={[3, 5, 3]} intensity={1.5} />
               <directionalLight position={[-3, 3, -2]} intensity={0.6} color="#C4B5FD" />

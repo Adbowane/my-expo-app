@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Dimensions, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, StatusBar } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import tw from 'twrnc';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import Navbar from '../../components/Navbar';
 import { API_URL } from '../../types';
 
 import { RouteParams, ProgrammesScreenNavigationProp, Program } from '../../types/ProgrammesScreen.types';
-import { styles, ITEM_WIDTH } from '../../styles/ProgrammesScreen.styles';
+import { styles, ITEM_WIDTH, SPACING } from '../../styles/ProgrammesScreen.styles';
 
 // Suppression des doublons de constantes
 
@@ -82,10 +82,11 @@ export default function Programmes() {
   const handleSelectProgram = (programId: number, index: number) => {
     setSelectedProgram(programId);
     setActiveIndex(index);
+    flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
   };
 
   const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50
+    itemVisiblePercentThreshold: 60
   };
 
   const onViewableItemsChanged = ({ viewableItems }: any) => {
@@ -119,26 +120,44 @@ export default function Programmes() {
     );
   }
 
-  const renderItem = ({ item, index }: { item: Program; index: number }) => (
-    <TouchableOpacity
-      style={[styles.card, { width: Math.round(ITEM_WIDTH) }]}
-      onPress={() => handleSelectProgram(item.Program_Id, index)}
-      activeOpacity={0.9}
-    >
-      <View style={styles.cardIconBox}>
-        <Ionicons name={item.Icon as any} size={130} color="white" />
-      </View>
-      <View style={styles.cardPading}>
-        <Text style={styles.cardTitle}>{item.Program_Name}</Text>
-        <Text style={styles.cardDesc}>{item.Description}</Text>
+  const renderItem = ({ item, index }: { item: Program; index: number }) => {
+    const isActive = activeIndex === index;
+    
+    return (
+      <View style={styles.cardWrapper}>
+        <TouchableOpacity
+          style={[styles.card, isActive && styles.cardActive]}
+          onPress={() => handleSelectProgram(item.Program_Id, index)}
+          activeOpacity={0.9}
+        >
+          <View style={styles.cardImageContainer}>
+            {isActive && (
+              <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>Sélectionné</Text>
+              </View>
+            )}
+            <View style={styles.cardIconCircle}>
+              <Ionicons name={item.Icon as any} size={50} color="#8B5CF6" />
+            </View>
+          </View>
+          
+          <View style={styles.cardPading}>
+            <View>
+              <Text style={styles.cardTitle} numberOfLines={2}>{item.Program_Name}</Text>
+              <Text style={styles.cardDesc} numberOfLines={3}>{item.Description}</Text>
+            </View>
 
-        <View style={styles.cardMeta}>
-          <Ionicons name="time-outline" size={18} color="#888" />
-          <Text style={styles.cardMetaText}>4-5 séances par semaine</Text>
-        </View>
+            <View style={styles.cardFooter}>
+              <View style={styles.cardMeta}>
+                <Ionicons name="time-outline" size={18} color="#888" />
+                <Text style={styles.cardMetaText}>4-5 séances / sem.</Text>
+              </View>
+            </View>
+          </View>
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <View style={styles.root}>
@@ -146,7 +165,7 @@ export default function Programmes() {
 
       <View style={styles.header}>
         <Text style={styles.title}>Programmes</Text>
-        <Text style={styles.subtitle}>Programmes adaptés à votre objectif</Text>
+        <Text style={styles.subtitle}>Découvrez les programmes adaptés à votre objectif</Text>
       </View>
 
       <View style={tw`flex-1`}>
@@ -155,21 +174,22 @@ export default function Programmes() {
           data={programmes}
           horizontal
           showsHorizontalScrollIndicator={false}
-          snapToInterval={ITEM_WIDTH + 16}
+          snapToInterval={ITEM_WIDTH + SPACING}
           decelerationRate="fast"
-          contentContainerStyle={tw`py-4 px-2`}
+          contentContainerStyle={styles.listContentContainer}
           viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
           keyExtractor={(item, index) => (item?.Program_Id?.toString() || index.toString())}
           renderItem={renderItem}
+          extraData={activeIndex}
         />
 
-        <View style={styles.dotContainer}>
+        <View style={styles.paginationContainer}>
           {programmes.map((_, index) => (
             <View
               key={index}
               style={[
                 styles.dot,
-                index === activeIndex ? tw`bg-teal-500` : tw`bg-gray-300`
+                index === activeIndex ? styles.dotActive : styles.dotInactive
               ]}
             />
           ))}
@@ -181,8 +201,10 @@ export default function Programmes() {
           <TouchableOpacity
             style={styles.mainBtn}
             onPress={() => navigation.navigate('Exercises', { programId: selectedProgram })}
+            activeOpacity={0.8}
           >
-            <Text style={styles.mainBtnText}>Commencer ce programme</Text>
+            <Text style={styles.mainBtnText}>Commencer</Text>
+            <Ionicons name="arrow-forward" size={20} color="white" />
           </TouchableOpacity>
         </View>
       )}
@@ -192,3 +214,4 @@ export default function Programmes() {
     </View>
   );
 }
+
