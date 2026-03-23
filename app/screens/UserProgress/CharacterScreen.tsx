@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { Character, AvatarCustomizations } from '../../components/Character';
 import { useAvatar } from '../../context/AvatarContext';
+import { AnimationKey, DASHBOARD_ANIMATIONS, ANIMATION_LABELS } from '../../data/exerciseAnimations';
 
 // Imports types & styles
 import { Nav } from '../../types/CharacterScreen.types';
@@ -37,6 +38,9 @@ const CharacterScreen = () => {
   const [selectedMorphology, setSelectedMorphology] = useState(customizations.morphology ?? 'athletic');
   const [selectedColor, setSelectedColor] = useState(customizations.primaryColor ?? '#7C3AED');
   const [selectedSkin, setSelectedSkin] = useState(customizations.skinTone ?? '#C68642');
+  const [selectedAnimation, setSelectedAnimation] = useState<AnimationKey>(
+    (customizations.defaultAnimation as AnimationKey) ?? 'idle'
+  );
   const [activeOutfitTab, setActiveOutfitTab] = useState<typeof OUTFIT_TABS[number]>('HAUTS');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -46,6 +50,7 @@ const CharacterScreen = () => {
     morphology: selectedMorphology,
     primaryColor: selectedColor,
     skinTone: selectedSkin,
+    defaultAnimation: selectedAnimation,
   };
 
   const morphologies = selectedGender === 'male' ? MORPHOLOGIES_MALE : MORPHOLOGIES_FEMALE;
@@ -112,7 +117,11 @@ const CharacterScreen = () => {
                 <directionalLight position={[3, 5, 3]} intensity={1.5} />
                 <directionalLight position={[-3, 3, -2]} intensity={0.5} color="#A78BFA" />
                 <Suspense fallback={null}>
-                  <Character customizations={previewCustom} />
+                  <Character
+                    customizations={previewCustom}
+                    animationName={selectedAnimation}
+                    isPlaying
+                  />
                 </Suspense>
               </Canvas>
               {isLoading && (
@@ -212,6 +221,42 @@ const CharacterScreen = () => {
               />
             ))}
           </View>
+        </View>
+
+        {/* ── Animation par défaut ─────────────────────────────── */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>ANIMATION PAR DÉFAUT</Text>
+          <Text style={[styles.sectionTitle, { fontSize: 11, fontWeight: '400', marginBottom: 12, color: '#6B7280' }]}>
+            Animation jouée sur ton tableau de bord
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 4 }}>
+              {DASHBOARD_ANIMATIONS.map((key) => (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => setSelectedAnimation(key)}
+                  style={[
+                    {
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      borderRadius: 20,
+                      backgroundColor: selectedAnimation === key ? PURPLE : '#F3F4F6',
+                      borderWidth: 2,
+                      borderColor: selectedAnimation === key ? PURPLE : 'transparent',
+                    },
+                  ]}
+                >
+                  <Text style={{
+                    color: selectedAnimation === key ? '#fff' : '#374151',
+                    fontWeight: selectedAnimation === key ? '700' : '500',
+                    fontSize: 13,
+                  }}>
+                    {ANIMATION_LABELS[key]}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
       </ScrollView>
 

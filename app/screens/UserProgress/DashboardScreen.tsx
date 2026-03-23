@@ -183,7 +183,11 @@ const DashboardScreen = () => {
               <directionalLight position={[-3, 3, -2]} intensity={0.6} color="#C4B5FD" />
               <pointLight position={[0, 2, 2]} intensity={0.8} color="#7B5CF0" />
               <Suspense fallback={null}>
-                <Character customizations={customizations} />
+                <Character
+                  customizations={customizations}
+                  animationName={customizations.defaultAnimation ?? 'idle'}
+                  isPlaying
+                />
               </Suspense>
             </Canvas>
           </View>

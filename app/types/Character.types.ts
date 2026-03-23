@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { AnimationKey } from '../data/exerciseAnimations';
 import { GLTF } from 'three-stdlib';
 
 export interface AvatarCustomizations {
@@ -14,6 +15,8 @@ export interface AvatarCustomizations {
   morphology?: string;
   /** Tenue sélectionnée */
   outfit?: string;
+  /** Animation jouée par défaut sur le Dashboard */
+  defaultAnimation?: AnimationKey;
 }
 
 export type GLTFResult = GLTF & {

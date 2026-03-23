@@ -36,6 +36,7 @@ const DEFAULT_CUSTOMIZATIONS: AvatarCustomizations = {
   gender: 'female',
   morphology: 'athletic',
   outfit: 'sport_01',
+  defaultAnimation: 'idle',
 };
 
 // ── Context ───────────────────────────────────────────────────────────────────

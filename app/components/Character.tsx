@@ -3,18 +3,20 @@ import { useGLTF, useAnimations } from '@react-three/drei/native';
 import * as THREE from 'three';
 
 import { AvatarCustomizations, GLTFResult, CharacterProps } from '../types/Character.types';
+import { ANIMATION_FILES, AnimationKey } from '../data/exerciseAnimations';
+import { GLTF } from 'three-stdlib';
 export * from '../types/Character.types';
 
-// ── Couleurs par défaut ───────────────────────────────────────────────────────
+// ── Fichier mesh principal (contient le squelette + skinned mesh) ─────────────
+const MESH_MODEL = require('../assets/air-squat.glb');
 
+// ── Couleurs par défaut ───────────────────────────────────────────────────────
 const DEFAULT_CUSTOMIZATIONS: AvatarCustomizations = {
   primaryColor: '#7C3AED',
   secondaryColor: '#4F46E5',
   skinTone: '#C68642',
   gender: 'female',
 };
-
-const modelPath = require('../assets/air-squat.glb');
 
 // ── Composant Character ───────────────────────────────────────────────────────
 
@@ -25,7 +27,17 @@ export function Character({
   ...props
 }: CharacterProps) {
   const group = useRef<THREE.Group>(null);
-  const { nodes, materials, animations } = useGLTF(modelPath) as GLTFResult;
+
+  // Charger le mesh principal (toujours air-squat.glb pour les nodes/materials)
+  const { nodes, materials } = useGLTF(MESH_MODEL) as GLTFResult;
+
+  // Charger le GLB correspondant à l'animation demandée
+  const animKey = (animationName as AnimationKey) ?? 'idle';
+  const animFile = ANIMATION_FILES[animKey] ?? ANIMATION_FILES['idle'];
+  const animResult = useGLTF(animFile) as GLTF & { animations: THREE.AnimationClip[] };
+  const { animations } = animResult;
+
+  // Connecter les animations au groupe du mesh
   const { actions, names } = useAnimations(animations, group);
 
   // Fusionner avec les defaults
@@ -40,39 +52,30 @@ export function Character({
     if (mergedCustom.primaryColor) {
       mat.color = new THREE.Color(mergedCustom.primaryColor);
     }
-    if (mergedCustom.skinTone) {
-      // En production on pourrait avoir un material séparé pour la peau
-      // Ici on garde la couleur du material principal pour la tenue
-    }
     mat.roughness = 0.6;
     mat.metalness = 0.1;
     return mat;
   }, [materials.maria_M1, mergedCustom.primaryColor]);
 
-  // Gérer l'animation
+  // Gérer la lecture de l'animation
   useEffect(() => {
-    const targetAnim = animationName
-      ? names.find((n) => n.toLowerCase().includes(animationName.toLowerCase()))
-      : names[0];
+    if (names.length === 0) return;
 
-    if (targetAnim && actions[targetAnim]) {
+    // Priorité : 1er clip du GLB chargé (chaque GLB n'en a qu'un)
+    const targetName = names[0];
+
+    if (actions[targetName]) {
       if (isPlaying) {
-        actions[targetAnim]?.reset().fadeIn(0.5).play();
+        actions[targetName]?.reset().fadeIn(0.3).play();
       } else {
-        actions[targetAnim]!.paused = true;
-      }
-    } else if (names.length > 0 && actions[names[0]]) {
-      if (isPlaying) {
-        actions[names[0]]?.reset().fadeIn(0.5).play();
-      } else {
-        actions[names[0]]!.paused = true;
+        actions[targetName]!.paused = true;
       }
     }
 
     return () => {
-      names.forEach((name) => actions[name]?.fadeOut(0.5));
+      names.forEach((name) => actions[name]?.fadeOut(0.3));
     };
-  }, [actions, names, animationName, isPlaying]);
+  }, [actions, names, animKey, isPlaying]);
 
   return (
     <group ref={group} {...props} dispose={null}>
@@ -91,4 +94,6 @@ export function Character({
   );
 }
 
-useGLTF.preload(modelPath);
+// Précharger tous les GLB d'animation au démarrage
+useGLTF.preload(MESH_MODEL);
+Object.values(ANIMATION_FILES).forEach((file) => useGLTF.preload(file));
